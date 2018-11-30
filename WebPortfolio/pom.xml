@@ -36,7 +36,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
-	
+
 	<build>
 		<finalName>WebPortfolio</finalName> <!-- 컨텍스트루트 와 동일 -->
 		<testSourceDirectory>src/main/java/com/pf/test</testSourceDirectory>
