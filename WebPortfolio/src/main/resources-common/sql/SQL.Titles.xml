@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.TitlesDao">
+	<insert id="insertTitles" parameterType="java.util.HashMap">
+		insert into titles
+		(emp_no,title,from_date,to_date)
+		values
+		(#{empNo},#{title},#{fromDate}, STR_TO_DATE('9999-01-01','%Y-%m-%d'))
+	</insert>
+	<update id="updateTitles" parameterType="java.util.HashMap">
+		UPDATE titles
+		SET to_date = #{toDate}
+		WHERE emp_no = #{empNo}
+		AND title = #{oldTitle}
+		AND from_date = #{oldFromDate}
+	</update>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.SalariesDao">
+	<insert id="insertSalaries" parameterType="java.util.HashMap">
+		insert into salaries
+		(emp_no,salary,from_date,to_date)
+		values
+		(#{empNo},#{salaries},#{fromDate}, STR_TO_DATE('9999-01-01','%Y-%m-%d'))
+	</insert>
+	
+	<update id="updateSalaries" parameterType="java.util.HashMap">
+		UPDATE salaries
+		SET to_date = #{toDate}
+		WHERE emp_no = #{empNo}
+		AND salary = #{oldSalary}
+		AND from_date = #{oldFromDate}
+	</update>
+</mapper>

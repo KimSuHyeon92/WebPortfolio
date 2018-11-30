@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.DepartmentsDao">
+	<select id="list" parameterType="java.util.HashMap" resultType="Departments" flushCache="false" useCache="false">
+	 SELECT   dept_no AS deptNo,
+             dept_name AS deptName
+        FROM departments
+        	WHERE 1=1  <!-- where절 다음에는 반드시 있어야하는 필수값을 넣을수있다. 만약 이 값이 없으면 쿼리전체에러 그래서 1=1 작성해서 true 해당  -->
+		<if test='deptNo != null and deptNo != ""'>
+         AND dept_no = #{deptNo}
+        </if>
+        <if test='deptName != null and deptName != ""'>
+	     AND (dept_name LIKE CONCAT('%', #{deptName}, '%') OR dept_name LIKE CONCAT('%', #{deptName}, '%')) <!-- 제목에도 해당키워드가 가 나와있거나 본문에 해당키워드가 나와있을때 -->
+	    </if>
+	<if test='sidx != null and sidx != ""'>
+	ORDER BY ${sidx} ${sord}
+	</if>
+	<if test='(start != null and start != "") and (end != null and end != "")'>
+	LIMIT ${start}, ${end}
+	</if>
+	
+	
+	<!-- 만약 검색할때 a라는 값이 들어간 값의 총갯수를 구하려면 totalcount 쿼리에서도 where절을 넣어 주어야한다. 
+	 ajax방식이라 검색할때 검색어를 입력후 검색버튼 누루면 해당 화면만 바뀌고 검색어도 그대로 남아있는것이다. 서블릿은 화면이 바뀌고 파라미터로  다시 받아와야하는 번거러움-->
+	</select>
+	<select id="getDepartments" parameterType="java.util.HashMap" resultType="Departments" flushCache="false" useCache="false">
+	 SELECT	dept_no,
+	 		dept_name
+     FROM 	departments 
+     WHERE 	dept_no = #{deptNo}
+	</select>
+	<insert id="addDepartments" parameterType="Departments" useGeneratedKeys="true">
+	insert into departments
+		(dept_no, dept_name)
+	values
+		(#{deptNo}, #{deptName})
+	</insert>
+	
+	<update id="updateDepartments" parameterType="Departments" >
+	update	departments
+	set		dept_name = #{deptName}
+	where	dept_no = #{deptNo}
+	</update>
+	
+	<delete id="deleteDepartments" parameterType="java.lang.String">
+	delete
+	from	departments
+	where	dept_no = #{deptNo}
+	
+	</delete>
+	
+	<select id="getRow" resultType="java.lang.Integer">
+	select count(dept_no)
+	from departments
+	WHERE 1=1
+		<if test='deptNo != null and deptNo != ""'>
+         AND dept_no = #{deptNo}
+        </if>
+		<if test='deptName != null and deptName != ""'>
+         AND dept_name = #{deptName}
+        </if>
+	</select>
+</mapper>

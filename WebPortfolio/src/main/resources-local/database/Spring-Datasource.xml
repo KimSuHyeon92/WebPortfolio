@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"/>
+		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/employees?characterEncoding=utf8"/>
+		<!-- 이컴퓨터에서 데이터를 아마존에 넣어두고 아마존에서 내 컴퓨터를 바라본다  : localhost -->
+		<!-- 데이터베이스 url -->
+		<property name="user" value="employees"/>
+		<property name="password" value="admin1027"/>
+		<property name="initialPoolSize" value="20"/>
+		<!-- 톤캣 - 풀 -풀갯수 -->
+		<property name="maxPoolSize" value="200"/>
+		<!-- 최대 풀 갯수 -->
+		<property name="acquireRetryAttempts" value="10"></property>
+		<!-- 쿼리실패시 시도횟수 -->
+    	<property name="preferredTestQuery" value="SELECT 1" />
+    	<!-- 커넥션연결시 정상수행됫는지여부 확인을 위해 select1을 넣어주고 성공하면 1반환 -->
+		<property name="testConnectionOnCheckin" value="true"></property>
+		<property name="testConnectionOnCheckout" value="false"></property>
+		<!-- 커넥션테스트 -->
+		<property name="idleConnectionTestPeriod" value="60"></property>
+		<property name="maxIdleTime" value="300"></property>
+		<!-- 300초지나면 실패 -->
+	</bean>
+	
+</beans>

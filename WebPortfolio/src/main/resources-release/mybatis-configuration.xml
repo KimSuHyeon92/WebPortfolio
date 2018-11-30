@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
+	
+	<!-- 
+	타입 별칭은 자바 타입에 대한 짧은 이름이다. 
+	오직 XML 설정에서만 사용되며, 타이핑을 줄이기 위해 존재한다.
+	com.pf.common 에서 빈을 검색하고 애노테이션이 없을 경우 빈의 이름이 소문자로 변환된 형태의 별칭으로 등록할 것이다 
+	
+	-->
+	<typeAliases>
+		<package name="com.pf.common"/>
+	</typeAliases>
+
+</configuration>

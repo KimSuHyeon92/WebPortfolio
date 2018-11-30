@@ -1,0 +1,63 @@
+package com.pf.util;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.mail.internet.MimeMessage;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
+
+//beans.xml 에서 scan해서 @component 읽어옴
+@Component
+public class MailUtil {
+
+	//@Autowired 어디선가 bean으로 등록되어있다는 의미
+	@Autowired
+    protected JavaMailSender  mailSender;
+	
+	public void sendEmail(Map<String, String> params) throws Exception {
+		
+		System.out.println("sendEmail >>> " + params);
+
+		MimeMessage msg = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+		//Mime:메세지 생성 helper:내용추가 
+
+		File tempFile = new File(params.get("attachFilePath"));
+		System.out.println("tempFile >> " + tempFile);
+		
+		//dto사용시
+		helper.setFrom(params.get("sender"));
+		helper.setTo(params.get("receiver"));
+		helper.setSubject(params.get("subject"));
+		helper.setText(params.get("content"));
+
+		/*
+        msg.setFrom(email.getSender());
+        msg.setSubject(email.getSubject());
+        msg.setText(email.getContent());
+        msg.setRecipient(RecipientType.TO , new InternetAddress(email.getReceiver()));
+		 */
+		
+		
+		FileSystemResource file = new FileSystemResource(tempFile);
+		System.out.println("-------------------------------------------------------------------");
+		System.out.println("attach file path : "+tempFile.getAbsolutePath());
+		System.out.println("attach file name : "+tempFile.getName());
+		System.out.println("attach file size : "+tempFile.length());
+		System.out.println("-------------------------------------------------------------------");
+		helper.addAttachment(file.getFilename(), file);
+
+		params.put("filename", tempFile.getName());
+		params.put("fileSize", String.valueOf(tempFile.length()));
+		
+		
+		mailSender.send(msg); 
+			
+	}
+}

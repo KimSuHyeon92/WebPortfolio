@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<!-- 언제까지 다닐지는 모르므로 현재기준 9999로 작성 -->
+<mapper namespace="com.pf.dao.DeptEmpDao">
+	<select id="list" parameterType="java.lang.String" resultType="DeptEmp"
+		flushCache="false" useCache="false">
+		SELECT emp_no,
+		dept_no,
+		from_date,
+		to_date
+		FROM dept_emp
+	</select>
+	
+	
+	<insert id="insertDeptEmp" parameterType="java.util.HashMap">
+		insert into dept_emp
+		(emp_no,dept_no,from_date,to_date)
+		values
+		(#{empNo},#{deptNo},
+		STR_TO_DATE(#{fromDate},'%Y-%m-%d'),
+		STR_TO_DATE('9999-01-01','%Y-%m-%d'))
+	</insert>
+	<!-- int updateDeptEmp(Map<String, Object> params); int addDeptEmp(Map<String, 
+		Object> params); -->
+
+	<update id="updateDeptEmp" parameterType="java.util.HashMap">
+		UPDATE dept_emp
+		SET to_date = NOW()
+		WHERE emp_no = #{empNo}
+		AND dept_no = #{oldDeptNo}
+		AND from_date = #{oldFromDate}
+	</update>
+	
+	<delete id="delDeptInfoButton" parameterType="java.util.HashMap">
+	delete
+	from	dept_emp
+	where dept_no = #{deptNo}
+	</delete>
+
+</mapper>

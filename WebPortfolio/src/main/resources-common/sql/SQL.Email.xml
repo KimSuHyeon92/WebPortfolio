@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.EmailDao">
+	
+	<insert id="addEmail" parameterType="java.util.HashMap">
+		insert into email
+		(sender,receiver,subject,content,filename,file_size,create_date)
+		values
+		(#{sender}, #{receiver}, #{subject}, #{content},#{filename}, #{fileSize}, now())
+		<selectKey resultType="int" keyProperty="idx" order="AFTER"> 
+		SELECT LAST_INSERT_ID()
+		</selectKey>	
+	</insert>
+	
+	<insert id="addCertEmail" parameterType="com.pf.common.CertEmail" >
+		insert into mailCert
+		(userEmail,sendEmail,certYn,fromDate,toDate)
+		values
+		(#{userEmail}, #{sendEmail}, #{certYn}, now(), now())
+		<selectKey resultType="int" keyProperty="idx" order="AFTER"> 
+		SELECT LAST_INSERT_ID()
+		</selectKey>	
+	</insert>
+
+	<update id="updateEmail" parameterType="java.util.HashMap">
+	update email
+	set send_date =  now(),
+		 filename = #{filename},
+		 file_size = #{fileSize}
+	where idx = #{idx}
+	</update>
+	
+	<update id="updateCertEmail" parameterType="String">
+	update mailCert
+	set  certYn = 'S',
+		 toDate = now()
+	where idx = #{idx}
+	</update>
+
+	<select id="getEmail" parameterType="java.lang.Integer"  resultType="java.util.HashMap">
+	select * from email
+	where idx = #{idx}
+	</select>
+	
+	<delete id="deleteEmail" parameterType="java.lang.Integer">
+	delete from email
+	where idx = #{idx}
+	</delete>
+	
+
+</mapper>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.EmployeesDao"> <!-- 작업지시서위치 -->
+	<!-- mybatis-configuration.xml에서 type을 적어야한다.,Employees.java 
+		에서 alias 적음 안적으면 클래스명을 따라간다. 앞글자소문자로해서 맞으면 자동으로 dto 만들어줌 -->
+		
+		
+	<!--사원정보 [사원번호,성명,성별,나이,입사일,근무부서,착임일,연봉] 공통쿼리 -->
+	<!-- insert 가 되기전 pk를 생성해주어야한다.(AI아님) 값이 keyproperty 의 이름으로 들어가 paramtype 으로 담긴다.  #{empNo} 에 담긴다.-->
+	<!-- STR_TO_DATE : 스트링값을 DATE로 -->
+	<!-- autoincre... 되어있는값을 after로 가져오고 쿼리문 끝난다음에 작성
+	autoincre.. 가 안되있고 수동조작해야할경우 before로 가져오고 쿼리문전에 작성-->
+	<!-- 대문자Y는 4자리 년도, 소문자 y는 2자리 년도 -->
+	
+	<insert id="insertEmployees" parameterType="java.util.HashMap">
+		
+		<selectKey resultType="String" keyProperty="empNo" order="BEFORE"> 
+		SELECT MAX(emp_no)+1 from employees
+		</selectKey>
+		insert into employees
+		(emp_no,first_name, last_name, birth_date, gender,hire_date)
+		values
+		(#{empNo},#{firstName}, #{lastName}, STR_TO_DATE(#{birthDate},'%Y-%m-%d'),#{gender}, STR_TO_DATE(#{hireDate},'%Y-%m-%d'))
+	</insert>
+	
+	<delete id="deleteEmployees" >
+		delete
+		from employees
+		where emp_no=#{empNo}
+	</delete>
+
+	<sql id="getEmployeesInfo-SQL">
+		SELECT A.emp_no as empNo,
+		CONCAT(A.first_name," ",A.last_name) as fullName,
+		TRUNCATE((TO_DAYS(now())-(TO_DAYS(A.birth_date)))/365, 0) as
+		birthDate,
+		A.gender, DATE_FORMAT(A.hire_date, '%Y-%c-%d') as hireDate,
+		
+		E.dept_name as deptName,
+		
+		B.salary,DATE_FORMAT(B.from_date, '%Y-%c-%d') as SfromDate,
+		
+		DATE_FORMAT(C.from_date, '%Y-%c-%d') as TitlesfromDate,
+		C.title,
+		
+		DATE_FORMAT(D.from_date, '%Y-%c-%d') as fromDate,
+		D.dept_no as deptNo
+		FROM employees A
+		left outer join salaries B on A.emp_no=B.emp_no
+		left outer join titles C on B.emp_no = C.emp_no
+		left outer join dept_emp D on C.emp_no = D.emp_no
+		left outer join departments E on D.dept_no = E.dept_no
+		WHERE 1=1
+		AND DATE_FORMAT(D.to_date, '%Y' ) ='9999'
+		AND DATE_FORMAT(B.to_date, '%Y' ) ='9999'
+		AND DATE_FORMAT(C.to_date, '%Y' ) ='9999'
+	</sql>
+
+	<!--사원정보 [사원번호,성명,성별,나이,입사일,근무부서,착임일,연봉] DATA 전부 -->
+	<select id="selectList" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		/* [SQL.employees.xml > getEmployeesInfo] */
+		
+		<include refid="getEmployeesInfo-SQL" />
+		<if test="deptNo != null and deptNo != ''">
+			AND D.dept_no = #{deptNo}
+		</if>
+		<if test="deptName != null and deptName != ''">
+			AND fullName LIKE CONCAT('%', #{deptName}, '%')
+		</if>
+		<if test="sidx != null and sidx != ''">
+			ORDER BY ${sidx} ${sord}
+		</if>
+		LIMIT ${start}, ${end}
+		
+	</select>
+
+	<!--사원정보 [사원번호,성명,성별,나이,입사일,근무부서,착임일,연봉] COUNT 숫자만 -->
+	<select id="getRow" resultType="java.lang.Integer">
+		/* [SQL.employees.xml > countEmployeesInfo] */
+		SELECT COUNT(empNo)
+		FROM(
+		<include refid="getEmployeesInfo-SQL" />
+		<if test="deptNo != null and deptNo != ''">
+			AND D.dept_no = #{deptNo}
+		</if>
+		) A
+		WHERE 1=1
+		<if test="deptName != null and deptName != ''">
+			AND fullName LIKE CONCAT('%', #{deptName}, '%')
+		</if>
+	</select>
+
+
+
+
+
+
+	<select id="getManager" resultType="java.lang.Integer">
+		select count(A.emp_no)
+		from dept_manager A
+		left outer join dept_emp B on A.emp_no = B.emp_no
+		left outer join departments C on B.dept_no = C.dept_no
+		left outer join titles D on A.emp_no = D.emp_no
+		left outer join salaries E on A.emp_no = E.emp_no
+		where date_format(E.to_date,'%Y')='9999' and
+		date_format(B.to_date,'%Y')='9999' and
+		date_format(D.to_date,'%Y')='9999';
+	</select>
+
+
+
+	<select id="departList" parameterType="java.util.HashMap"
+		resultType="java.util.HashMap">
+		select
+		A.dept_no AS deptNo,
+		D.dept_name AS deptName,
+		CONCAT(B.first_name, ' ', B.last_name) as fullName,
+		date_format(A.from_date,'%Y-%m-%d') as fromDate,
+		E.salary
+		from dept_manager A
+		left outer join employees B on A.emp_no = B.emp_no
+		left outer join dept_emp C on B.emp_no = C.emp_no
+		left outer join departments D on C.dept_no = D.dept_no
+		left outer join salaries E on B.emp_no = E.emp_no
+		left outer join titles F on B.emp_no = F.emp_no
+		where date_format(A.to_date,'%Y')='9999' and
+		date_format(C.to_date,'%Y')='9999' and
+		date_format(E.to_date,'%Y')='9999' and
+		date_format(F.to_date,'%Y')='9999';
+	</select>
+	
+
+	
+	
+
+
+</mapper>
+
+
+

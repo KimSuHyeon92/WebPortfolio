@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.NoticeDao"> <!-- 작업지시서위치 sord:정렬방법 sidx:정렬기준  -->
+	<select id="list" resultType="java.util.HashMap">
+		select no,title,name,read_cnt as readCnt,date_format(create_date, '%Y-%m-%d-%H:%i') as createDate
+		from notice
+		where 1=1
+		<if test='no != null and no != ""'>
+         AND no = #{no}
+        </if>
+        <if test='title != null and title != ""'>
+	     AND title LIKE CONCAT('%', #{title}, '%')
+	    </if>
+	    <if test='name != null and name != ""'>
+	     AND name LIKE CONCAT('%', #{name}, '%')
+	    </if>
+	<if test='sidx != null and sidx != ""'>
+	ORDER BY ${sidx} ${sord}
+	</if>
+	<if test='(start != null and start != "") and (end != null and end != "")'>
+	LIMIT ${start}, ${end}
+	</if>
+	</select>
+	
+	
+	<select id="getRow" resultType="int" parameterType="java.util.HashMap">
+	select count(no)
+	from notice
+	where 1=1
+		<if test='no != null and no != ""'>
+         AND no = #{no}
+        </if>
+        <if test='keywords != null and keywords != ""'>
+	     AND title LIKE CONCAT('%', #{keywords}, '%') OR content LIKE CONCAT('%', #{keywords}, '%')
+	    </if>
+	</select>
+	
+	
+	<select id="findTotalNotice" resultType="int">
+		select count(no) from
+		notice
+	</select>
+	
+	
+	<!-- "마이바티스는 자동 생성키를 지원 한다" - useGeneratedKeys:데이터베이스에서 내부적으로 생성한 키를 받는 JDBC getGeneratedKeys메소드를 사용하도록 설정하다. 디폴트는 false 이다.-->
+	<insert id="insertNotice" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="no">
+		insert into notice
+		(name, password, title, content, has_file, create_date)
+		values
+		(#{name}, sha2(md5(#{password}),256), #{title}, #{content}, #{hasFile}, now())
+		<!-- <selectKey resultType="int" keyProperty="no" order="AFTER"> 
+		SELECT LAST_INSERT_ID()
+		</selectKey> -->
+	</insert>
+	
+	
+	<select id="getNotice" parameterType="java.lang.Integer" resultType="Notice">
+		SELECT   no,
+    		 name,
+    		 password,
+    		 title,
+    		 content,
+    		 read_cnt AS readCnt,
+    		 has_file AS hasFile,
+    		 date_format(create_date, '%Y-%m-%d-%H:%i') as createDate,
+    		 date_format(update_date, '%Y-%m-%d-%H:%i') as updateDate
+        FROM notice
+       WHERE 1=1
+         AND no = #{no}
+	</select>
+	
+	
+	<select id="makePassword" parameterType="java.lang.String" resultType="java.lang.String">
+		select sha2(md5(#{password}),256)
+	</select>
+	
+	
+	<update id="modifyNotice" parameterType="java.util.HashMap">
+		UPDATE notice
+           SET title = #{title},
+               content = #{content},
+               has_file = #{hasFile},
+               update_date = now()
+         WHERE no = #{no}
+	</update>
+	<delete id="deleteNotice" parameterType="java.lang.Integer">
+		delete
+		from notice
+		where no=#{no}
+	</delete>
+	<update id="readCount" parameterType="java.lang.Integer">
+		update notice
+		set read_cnt= read_cnt+1
+		where no=#{no}
+	</update>
+</mapper>
+
+
+

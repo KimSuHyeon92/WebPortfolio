@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.AttachmentDao">
+	
+	<select id="getAttachment" parameterType="java.util.HashMap" resultType="Attachment" flushCache="false" useCache="false">
+    /* [SQL.AttachmentDAO.xml > getAttachment] */
+    SELECT   *
+        FROM attachment
+       WHERE 1=1
+         AND attach_doc_type = #{attachDocType}
+         AND attach_doc_key = #{attachDocKey}
+	</select>
+	
+	<insert id="addAttachment" parameterType="java.util.HashMap" useGeneratedKeys="true">
+		/* [SQL.AttachmentDAO.xml > addAttachment] */
+		INSERT INTO attachment
+			(attach_doc_type, attach_doc_key, filename, fake_name, file_size, content_type, create_date) 
+		VALUES 
+			(#{attachDocType}, #{attachDocKey}, #{filename}, #{fakeName}, #{fileSize}, #{contentType}, now())
+	</insert>
+	
+	
+	<delete id="deleteAttachment" parameterType="int">
+		/* [SQL.AttachmentDAO.xml > deleteAttachment] */
+		DELETE 
+		  FROM attachment
+		 WHERE attach_seq = #{attachSeq}
+	</delete>
+	
+</mapper>

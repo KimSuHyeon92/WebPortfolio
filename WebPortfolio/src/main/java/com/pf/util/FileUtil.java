@@ -1,0 +1,174 @@
+package com.pf.util;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.pf.common.Attachment;
+import com.pf.service.AttachmentService;
+
+
+@Component
+public class FileUtil {
+
+	@Value("${file.attach.upload.path}") //vale(꺼내쓴다)  
+	private String fileUploadDirectory="home/ubuntu/app/attach/tmp"; //담아줄변수선언(경로)
+	
+	//옛날 스프링코드 private String fileUploadDirectory = "c:/tmp/upload";
+	//수동배포 스프링코드private String fileUploadDirectory = "home/ubuntu/app/attach/tmp";
+	
+	private static Logger logger = Logger.getLogger(FileUtil.class);
+	
+	public static final int BUFFER_SIZE = 2048;
+	
+	private String newFilenameBase = null;
+	private String originalFileExtension = null;
+	private String newFilename = null;
+	private String storageDirectory = null;
+	private String contentType = null;
+	private File newFile = null;
+	
+	public FileUtil(){}
+	
+	@Autowired
+	AttachmentService attachService;
+	
+	/**
+	 * 	첨부파일 다운로드
+	 */
+	public byte[] getFile(HttpServletResponse response, Map<String, Object> params){
+		try {
+			Attachment attachment = attachService.getAttachment(params);
+			File file = new File(fileUploadDirectory + "/" + params.get("attachDocType") + "/" + attachment.getFakeName());
+			
+			response.setContentType( attachment.getContentType() );
+//			response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
+			// 한글 파일명 인코딩
+			String endcodingName = java.net.URLEncoder.encode(attachment.getFilename(), "UTF-8");
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + endcodingName + "\"");
+			response.setHeader("Pragma", "no-cache");
+			response.setHeader("Cache-Control", "no-cache");
+			response.setContentLength( attachment.getFileSize().intValue());
+		
+			return FileUtils.readFileToByteArray(file);
+		} catch(IOException e) {
+			e.printStackTrace();
+			logger.error(e);
+			return null;
+		}
+	}
+	
+	// 첨부파일 조회
+	public Attachment getAttachment(Map<String, Object> params) {
+		return attachService.getAttachment(params);
+	}
+	
+	// 첨부파일 삭제
+	public int deleteAttachment(Map<String, Object> params) {
+		Attachment attach = attachService.getAttachment(params);
+		// DB 삭제
+		int result = attachService.deleteAttachment(attach);
+		// 물리 저장소 삭제
+		boolean b = deleteFileOnSystem(attach);
+		return (result==1 && b)?1:0;	
+	}
+	
+	/**
+	 * 일반 첨부파일 단일 업로드
+	 * @param params
+	 * @param file
+	 */
+	public void uploadFile(Map<String, Object> params, MultipartFile file) {
+		// 단일 업로드는 배열로 만들어 다중 업로드로 보내면 됨
+		uploadFiles(params, new MultipartFile[] { file });
+	}
+	
+	/**
+	 *	일반 첨부파일 다중 업로드 
+	 */
+	public void uploadFiles(Map<String, Object> params, MultipartFile[] files){
+		
+		// 게시판 종류
+		String attachDocType = params.get("attachDocType").toString();
+		// 게시글 키
+		int attachDocKey = Integer.valueOf(params.get("attachDocKey").toString());
+		// DTO (or Value Object)
+		Attachment attach = null;
+		
+		// 배열에 담긴 File을 돌려...
+		for(MultipartFile mpf : files){
+			// DTO 생성
+			attach = new Attachment();
+			
+			// 물리 저장소에 저장할 이름 생성
+			newFilenameBase = UUID.randomUUID().toString();
+			// 파일 확장자
+			originalFileExtension = mpf.getOriginalFilename().substring(mpf.getOriginalFilename().lastIndexOf("."));
+			//System.out.println("originalFileExtension >>> "+originalFileExtension.substring(1));
+			
+			// 파일명 + 확장자 
+			newFilename = newFilenameBase + originalFileExtension;
+			// 물리 저장소에 저장할 경로
+			storageDirectory = fileUploadDirectory;
+			// 파일 종류
+			contentType = mpf.getContentType();
+			
+			// 물리 저장소에 저장할 경로 입력
+			newFile = new File(storageDirectory);
+			// 없으면 생성
+			if(!newFile.exists()) newFile.mkdirs();
+			// 물리 저장소에 저장할 경로 + 게시판 종류 입력
+			newFile = new File(storageDirectory, attachDocType);
+			
+			// 없으면 생성
+			if(!newFile.exists()) newFile.mkdirs();
+			// 물리 저장소에 빈(empty) 파일 생성
+			newFile = new File(newFile.getAbsolutePath(), newFilename);
+			System.out.println("upload file path : "+newFile.getAbsolutePath());
+			
+			try {
+				// DB에 입력하기 위한 DTO set
+				attach.setAttachDocType(attachDocType);
+				attach.setAttachDocKey(attachDocKey);
+				attach.setFakeName(newFilename);
+				attach.setContentType(contentType);
+				attach.setFilename(mpf.getOriginalFilename());
+				attach.setFileSize(mpf.getSize());
+				
+				// DB에 입력
+				attachService.addAttachment(attach);
+				
+				// 물리저장소에 파일 쓰기 
+				FileCopyUtils.copy(mpf.getBytes(), newFile);
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+				logger.error(e);
+			}
+		}
+	}
+	
+	/**
+	 * 첨부파일 삭제
+	 * @param attach
+	 * @return
+	 */
+	public boolean deleteFileOnSystem(Attachment attach){
+		File file = new File(fileUploadDirectory+"/"+attach.getAttachDocType()+"/"+ attach.getFakeName());
+		if(file.exists()){
+			return file.delete();
+		}
+		return false;
+	}
+}

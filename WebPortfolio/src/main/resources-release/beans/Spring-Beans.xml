@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+	xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- Annotation 기반의 Component Scan 필터(service package 만 검색) -->
+	<context:component-scan base-package="com.pf">
+		<context:include-filter type="regex" expression="\.*\.service\.*" /> <!-- regex : 표현식  service의모든파일 -->
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Component" />
+		<!-- expression : scan한것중 어노테이션이 붙은것을 등록 -->
+	</context:component-scan>
+
+	
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		
+		<!-- myBatis 기본 설정 -->
+		<property name="configLocation" value="classpath:mybatis-configuration.xml"></property>
+	
+		<!-- query 적힌 xml 위치 -->
+		<property name="mapperLocations" value="classpath:sql/SQL.*.xml"></property>
+		
+		<!-- 트랜잭션 관리를 위한 것 -->
+		<property name="transactionFactory">
+			<bean class="org.mybatis.spring.transaction.SpringManagedTransactionFactory" />
+		</property>
+	</bean>
+	
+	<!-- DAO 위치를 basePackage로.. -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.pf.dao" />
+	</bean>
+	
+	<!-- 트랜잭션 관리를 위한 bean  -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 트렉잰션 어노테이션을 읽어와서 manager에게 전달해준다. transactionManager:위에 bean id 값  -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- File Upload 등록해야한다 꼭! 파일업로드하기위해 꼭 필요하다 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> 
+		<property name="maxUploadSize" value="50000000" />  <!-- value="50000000" : 사이즈지정 5MB -->
+	</bean>
+	
+	<!-- 
+	이메일 보내기 
+	구글메일을 가져다쓴다.
+	smtp : 메일보내는
+	--> 
+	<bean id="mailSender" class ="org.springframework.mail.javamail.JavaMailSenderImpl" >
+	    <property name="host" value="smtp.gmail.com" />
+	    <property name="port" value="587" />
+	    <property name="protocol" value="smtp" />
+	    <property name="username" value="kisusu1027@gmail.com" />
+	    <property name="password" value="tbanti21" />
+	    <property name="javaMailProperties">
+	    <props>
+	    	<prop key="mail.smtp.auth">true</prop>
+	        <prop key="mail.smtp.starttls.enable">true</prop>
+	    </props>
+	    </property>
+	</bean>
+	
+
+
+</beans>

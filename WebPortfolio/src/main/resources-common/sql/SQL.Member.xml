@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.pf.dao.MemberDao"> <!-- 작업지시서위치 -->
+
+	<select id="selectCustBase" parameterType="com.pf.common.Member"
+		resultType="com.pf.common.Member">
+		SELECT  userNo, 
+	            userEmail,
+	            userName,
+	            userPassword
+	        FROM
+                member
+	        WHERE 1=1
+	        AND	userEmail = #{userEmail}
+	</select>
+	
+	<insert id="userInsert" parameterType="com.pf.common.Member">
+		INSERT into member
+		(userName,userPassword,userEmail)
+		values
+		(#{userName}, sha2(md5(#{userPassword}),256), #{userEmail})
+		<selectKey resultType="int" keyProperty="userNo" order="AFTER"> 
+		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	
+	
+
+</mapper>
+
+
+

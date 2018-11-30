@@ -1,0 +1,35 @@
+package com.pf.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.pf.common.Notice;
+import com.pf.common.Departments;
+
+
+
+
+public interface NoticeService {
+	
+
+	public List<Notice> list(Map<String, Object> params);
+
+	public int findTotalNotice();
+	
+	public int insertNotice(Notice notice);
+
+	public Notice getNotice(int noticeNo);
+
+	public String makePassword(String password);
+
+	public int modifyNotice(Notice notice);
+
+	public int deleteNotice(int no);
+
+	public int readCount(int noticeNo);
+	
+	public int getRow(Map<String, Object> params);
+
+	
+
+}
