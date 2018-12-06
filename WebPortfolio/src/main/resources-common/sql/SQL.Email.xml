@@ -13,29 +13,12 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 		SELECT LAST_INSERT_ID()
 		</selectKey>	
 	</insert>
-	
-	<insert id="addCertEmail" parameterType="com.pf.common.CertEmail" >
-		insert into mailCert
-		(userEmail,sendEmail,certYn,fromDate,toDate)
-		values
-		(#{userEmail}, #{sendEmail}, #{certYn}, now(), now())
-		<selectKey resultType="int" keyProperty="idx" order="AFTER"> 
-		SELECT LAST_INSERT_ID()
-		</selectKey>	
-	</insert>
 
 	<update id="updateEmail" parameterType="java.util.HashMap">
 	update email
 	set send_date =  now(),
 		 filename = #{filename},
 		 file_size = #{fileSize}
-	where idx = #{idx}
-	</update>
-	
-	<update id="updateCertEmail" parameterType="String">
-	update mailCert
-	set  certYn = 'S',
-		 toDate = now()
 	where idx = #{idx}
 	</update>
 

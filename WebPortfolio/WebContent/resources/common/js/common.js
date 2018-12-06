@@ -9,19 +9,28 @@ function gridResize(gridId){
 };
 
 function postAjax(url,dataBody,func){
-	alert("아작스탐");
+	
 	$.ajax({
 		url	: url,
 		type: 'POST',
 		data :dataBody,
 		success : func,
 		error : function (XMLHttpRequest, textStatus, errorThrown) {
-			alert("에러가여기서나는거냐");
+
 			alert('에러 \n'+XMLHttpRequest);
 			
 		},
-		complete : function () {  
-			
+		beforeSend : function () {
+			$("body").prepend(
+				"<div class='tempProgressBar' style='width:100%;height:100%;background-color:black;opacity:0.4;z-index:10000;position:fixed;'>" +
+					"<div style='width:100px;height:100px;position:absolute;left:50%;top:50%'>" +
+						"<img src='resources/img_loading.gif'></img>" +
+					"</div>" + 
+				"</div>"
+			);
+		},
+		complete : function() {
+			$("body").find(".tempProgressBar").remove();
 		}
 	});
 };

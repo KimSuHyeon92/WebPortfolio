@@ -44,5 +44,11 @@ public class MemberServiceImpl implements MemberService {
 		return dao.userInsert(vo);
 	}
 
+	@Override
+	public int updateUserPw(Member basic) throws Exception {
+		// TODO Auto-generated method stub
+		return dao.updateUserPw(basic);
+	}
+
 	
 }

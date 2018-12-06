@@ -117,6 +117,8 @@ $(document).ready(function(){
 			//each문 밖에 append 하면 for문이 돌지 않아(계속적용이 안되고) 처음 한번만 작성되게된다.
 			
 			$.each(depts, function(key, dept){
+				//depts를 반복한다(list) key는 list안에 갯수만큼 반복한다. dept는 선택된것 즉 depts의값
+				//key:반복횟수 / dept:대상
 				// $('<option>') 로 태그 생성
 				// attr : attribute (속성) 지정
 				// text 화면에 보여줄 텍스트 

@@ -36,7 +36,7 @@ button{
 <title>BBS Write</title>
 <script type="text/javascript">
 
-	// 컨트롤러에서 보낸 메세지가 있을 경우
+	// 컨트롤러에서 보낸 메세지가 있을 경우(첨부파일삭제후)
 	window.onload = function(e){ 
 		// addObject 한 것 꺼내기
 		var resultMsg = '${resultMsg}';
@@ -109,19 +109,7 @@ button{
 		frm.content.value = content;
 		
 		
-		// 확장자명 구하기
-		/*  
-		indexOf : 기본적으로 문자열에서 문자의 위치를 찾기 위해서 , 전체 문자열의 왼쪽에서부터 특정 문자열이 존재하는 위치를 찾고 싶은 것
-		lastIndexOf : 기본적으로 문자열에서 문자의 마지막에 등장하는 위치를 찾고 싶을때  , 전체 문자열의 오른쪽에서부터 특정 문자열이 존재하는 위치를 찾고 싶은 것
 		
-		첨부파일이름.substring(첨부파일이름.lastIndexOf(첨부파일이름.indexOf(".")))
-		
-		- lastIndexOf 사용이유?
-		첨부파일이름에서 중간에 .이 들어갈수 있기 때문에 ex) t.est.txt  오른쪽에서부터 . 을찾아 잘라준다.
-		
-		- (  첨부파일이름.lastIndexOf(".")  )  하면 오른쪽에서부터 . 을 찾고 인덱스번호값을 찾은다음(18) . 이전 값을 다 잘라낸다.  ex) test.txt  ->  .txt
-		. 을 없애기 위해서는 +1 해주면 . 도 사라진다.
-		*/
 		
 		
 		/* console.log("indexOf >> "+filename.indexOf("."));
@@ -174,6 +162,20 @@ button{
 		var frm = document.bbsForm;
 		var filename = frm.attachedFile.value;
 		/* console.log("filename >> "+filename); */
+		// 확장자명 구하기
+		/*  
+		indexOf : 기본적으로 문자열에서 문자의 위치를 찾기 위해서 , 전체 문자열의 왼쪽에서부터 특정 문자열이 존재하는 위치를 찾고 싶은 것
+		lastIndexOf : 기본적으로 문자열에서 문자의 마지막에 등장하는 위치를 찾고 싶을때  , 전체 문자열의 오른쪽에서부터 특정 문자열이 존재하는 위치를 찾고 싶은 것
+		
+		첨부파일이름.substring(첨부파일이름.lastIndexOf(첨부파일이름.indexOf(".")))
+		
+		- lastIndexOf 사용이유?
+		첨부파일이름에서 중간에 .이 들어갈수 있기 때문에 ex) t.est.txt  오른쪽에서부터 . 을찾아 잘라준다.
+		
+		- (  첨부파일이름.lastIndexOf(".")  )  하면 오른쪽에서부터 . 을 찾고 인덱스번호값을 찾은다음   ex) test.txt  ->  .txt
+		. 을 없애기 위해서는 +1 해주면 . 도 사라지며 
+		*/
+		
 		var filename2 = filename.substring(filename.lastIndexOf(".")+1);
 		
 		if(filename2.match)

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pf.common.CertEmail;
+import com.pf.common.Email;
 import com.pf.controller.EmployeesController;
 import com.pf.dao.EmailDao;
 import com.pf.service.EmailService;
@@ -52,7 +52,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public int addCertEmail(CertEmail basic) {
+	public int addCertEmail(Email basic) {
 		// TODO Auto-generated method stub
 		return emdao.addCertEmail(basic);
 	}

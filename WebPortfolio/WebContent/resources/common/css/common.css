@@ -87,3 +87,73 @@ index css
 #JoinModal #mailOk,
 #JoinModal #mailEnd
 { margin-bottom:20px; }
+
+
+/***************************************************************
+notice list css
+***************************************************************/
+
+#keywords { width:470px; }
+#btnWrite { 
+	float:right; 
+	margin-bottom:15px;
+	background: #007fff;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    margin-left: 15px;
+    cursor:pointer;}
+#gbox_noticeGrid { clear:both;}
+#btnSearch { 
+	background: #888;
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    margin-left: 15px;
+    cursor:pointer; }
+
+
+
+/***************************************************************
+notice list css
+***************************************************************/
+
+
+
+/***************************************************************
+notice read css
+***************************************************************/
+
+.comment-Wrap {
+	margin-top:30px;
+}
+
+
+.comment-Wrap .title {
+	padding: 0 15px 0 20px;
+}
+
+.comment-Wrap .wrap {
+	padding:15px 20px;
+}
+
+.comment-Wrap .wrap .login {
+	margin-bottom:10px;
+}
+
+.comment-Wrap .wrap .login .title {
+	width:50px;display: inline-block;
+}
+
+.comment-Wrap .wrap .login #writer,
+.comment-Wrap .wrap .login #writerPw {
+	margin-left:20px; margin-bottom:5px;
+}
+
+.comment-Wrap .wrap button {
+	float:right;margin-top:10px;
+}
+
+#CmMain{
+	padding:15px 20px;
+}

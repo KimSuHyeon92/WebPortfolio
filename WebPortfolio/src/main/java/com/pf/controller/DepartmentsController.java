@@ -224,9 +224,9 @@ public class DepartmentsController {
 	@ResponseBody
 	public List<Departments> getSelectBoxData(@RequestParam Map<String, String> params){
 		logger.debug("getSelectBoxData : "+ params);
-		System.out.println("deptNo >> "+params);
+		System.out.println("deptNo >> "+params.get("deptNo"));
 		List<Departments> list = deptService.list(params);
-		
+		System.out.println("list >> "+list);
 		return list;
 	}
 	

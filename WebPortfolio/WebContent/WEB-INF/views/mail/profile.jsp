@@ -59,14 +59,8 @@ $(document).ready(function(){
 			        		
 			        		//작성한 이메일 가져오기
 			        		var receiver = $('#dialogMail input#mailtext').val();
-			        		var sender = "kimsuhyeon1027@gmail.com";
-			        		var subject = "신입 웹개발자 김수현 이력서 입니다.";
-			        		var content = "안녕하세요? 신입 웹개발자 김수현이력서 를 받아주셔서 감사합니다.";
-			        		//var filename = "";
-			        		//var fileSize = ;
-			        		
-			        		var exptext = /^[A-Za-z0-9_\.\-]+@[A-Za-z0-9\-]+\.[A-Za-z0-9\-]+/;
 			        		var sendProfile = "Y";
+			        		var exptext = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,16}$/;
 			        		//ajax 호출 직전
 			        		// overlay 보이기
 			        		$("#loading-div-background").css({'z-index' : '9999'}).show();
@@ -75,10 +69,8 @@ $(document).ready(function(){
 			        			
 			        			$.ajax({
 			        				url: '<c:url value="addEmail.do" />',
-					        		data :{ 'sender' : sender, 
+					        		data :{ 
 					        			     'receiver' : receiver,
-					        			     'subject' : subject,
-					        			     'content':content,
 					        			     'sendProfile':sendProfile
 				        					 },
 					        		success : function (depts, textStatus, XMLHttpRequest) {

@@ -4,30 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.util.SystemOutLogger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-
-
 import com.pf.common.Attachment;
 import com.pf.common.Comment;
 import com.pf.common.Notice;
@@ -35,7 +22,6 @@ import com.pf.service.NoticeService;
 import com.pf.util.FileUtil;
 import com.pf.util.JsonResponse;
 
-import net.sf.json.JSONArray;
 
 
 @Controller
@@ -52,15 +38,11 @@ public class NoticeController {
 	
 
 	/**
-	 * 공지사항 화면(기본그리드)
+	 * 게시판 그리드 화면
 	 * @param params
 	 * @return
 	 */
 	@RequestMapping("/notice/noticeList.do")
-	
-	//각각 HTTP 요청 몸체를 자바 객체로 변환하고 자바 객체를 HTTP 응답 몸체로 변환하는 데 사용된다.
-	//return되는 값은 View를 통해서 출력되는 것이 아니라 HTTP Response Body에 직접쓰여지게 된다.
-
 	public ModelAndView listpage(@RequestParam Map<String, Object> params){
 
 		// 파라미터가 콘솔창에서 로그로 찍힌다. 메소드 첫줄은 로그찍어서 파라미터를 받아오는걸 작성해줘야한다.
@@ -81,12 +63,17 @@ public class NoticeController {
 
 	}
 
+	/** 게시판 리스트 화면
+	 * @param params
+	 * @return
+	 */
 	@RequestMapping("/notice/list.do")
-	@ResponseBody
+	@ResponseBody //각각 HTTP 요청 몸체를 자바 객체로 변환하고 자바 객체를 HTTP 응답 몸체로 변환하는 데 사용된다. //return되는 값은 View를 통해서 출력되는 것이 아니라 HTTP Response Body에 직접쓰여지게 된다.
 	public JsonResponse<Notice> list(@RequestParam Map<String, Object> params){
 		logger.debug("getNoticeListData params > "+params);
 
 		//parameter for paging 
+		
 		int pageSize = Integer.parseInt(params.get("rows").toString());	// 한 페이지에 보여줄 개수
 		int currentPage = Integer.parseInt(params.get("page").toString());	// 현재 페이지
 		int totalCount = noticeService.getRow(params);		// 총 게시글 수
@@ -101,6 +88,10 @@ public class NoticeController {
 		List<Notice> list = noticeService.list(params);
 		
 		//com.pf.util 에 제이슨파일에 있는 메소드들
+		//jsonReader는 json방식으로 jqGrid에 맞는 json 형태로 가져와 page, rows, total, records 매핑된다.
+
+		//서버단에서 데이터를 jqGrid의 json방식으로 만들어줘서 뿌려주면된다.
+
 		JsonResponse<Notice> res = new JsonResponse<Notice>();
 		res.setRows(list); //전체리스트
 		res.setPage(String.valueOf(currentPage)); //현재
@@ -112,6 +103,10 @@ public class NoticeController {
 	}
 
 
+	/** 게시판 읽기 화면
+	 * @param params
+	 * @return
+	 */
 	@RequestMapping("/notice/read.do")
 	public ModelAndView read(@RequestParam Map<String, Object> params){
 		
@@ -123,17 +118,13 @@ public class NoticeController {
 		int NoticeNo = Integer.valueOf(params.get("noticeNo").toString());
 		// 첨부파일 검색 첫번째 조건은 url에 get 방식으로 넘어온다. 없으면 기본값 notice 저장
 		String attachDocType = params.containsKey("attachDocType") ? params.get("attachDocType").toString() : "notice";
-		
-		noticeService.readCount(NoticeNo);
+		//containsKey : 해당키값이 있는지여부 boolean형 으로 반환
+		noticeService.readCount(NoticeNo); //방문횟수
 		
 		// jsp 지정과 jsp 쓸 파라미터를 넣어 줄 수 있는 클래스인 ModelAndView 선언
 		ModelAndView model = new ModelAndView();
 		
-		
-		
-		Notice resultMap = noticeService.getNotice(NoticeNo);
-		
-
+		Notice resultMap = noticeService.getNotice(NoticeNo); //게시글번호로 게시글 가져온다.
 		
 		// ' " 바꾸기 
 		String content = resultMap.getContent().toString();
@@ -166,9 +157,10 @@ public class NoticeController {
 
 	}
 
-	/**
-	 * 공지사항 작성 페이지로 이동하기
-	 * 
+	
+	/** 게시판 쓰기 그리드  화면
+	 * @param params
+	 * @return
 	 */
 	@RequestMapping(value="/notice/noticeWrite.do")
 	public ModelAndView noticeWrite(@RequestParam Map<String, Object> params){
@@ -188,8 +180,11 @@ public class NoticeController {
 
 	}
 
-	/**
-	 * 공지사항 작성하기
+	
+	/** 게시판 쓰기 화면
+	 * @param params
+	 * @param file
+	 * @return
 	 */
 	@RequestMapping(value="/notice/write.do")
 	@ResponseBody
@@ -266,10 +261,6 @@ public class NoticeController {
 			
 			
 		}
-		
-		
-		
-		
 		//resultMap.put("filename2", filename2);
 		// 영향 받은 row 수를 resultMap에 put, ajax 결과값 처리에 쓰임
 		resultMap.put("resultCode", result);
@@ -278,23 +269,24 @@ public class NoticeController {
 		return resultMap;		
 	}
 	
-	/**
-	 * 사용자 비밀번호 암호화
-	 */
 	
+	/** 사용자 패스워드 암호화
+	 * @param params
+	 * @return
+	 */
 	@RequestMapping("/notice/comparePass.do")
 	@ResponseBody
 	public boolean comparePass(@RequestParam Map<String, Object> params){
 		
 		//넘어오는 파라미터 로그찍기
 		logger.debug("comparePass params : "+params);
-		System.out.println("comment commentNo >> "+params.get("commentNo"));
+		//System.out.println("comment commentNo >> "+params.get("commentNo"));
 		//사용자가 입력한 패스워드 받기
 		String pass = params.get("pass").toString();
-		System.out.println("params.get pass >> "+params.get("pass").toString());
+		//System.out.println("params.get pass >> "+params.get("pass").toString());
 		//입력받은 패스워드를 바로 암호화 시킨다.
 		String makepass = noticeService.makePassword(pass);
-		System.out.println("입력받은패스워드 암호화 한 값 >> "+makepass);
+		//System.out.println("입력받은패스워드 암호화 한 값 >> "+makepass);
 		
 		
 	
@@ -305,59 +297,55 @@ public class NoticeController {
 		
 		//사용자입력패스워드(암호화) 와 사용자가게시글작성시입력했던패스워드(암호화) 되어있는것 비교
 		boolean result = notice.getPassword().equals(makepass);
-		System.out.println("result 값 >> "+result);
+		//System.out.println("result 값 >> "+result);
 		return result;
-		
-		
-		
 		
 	}
 	
+	
+	/** 댓글 사용자 패스워드 암호화
+	 * @param params
+	 * @return
+	 */
 	@RequestMapping("/notice/CmtcomparePass.do")
 	@ResponseBody
 	public Comment CmtcomparePass(@RequestParam Map<String, Object> params){
 		
-		//넘어오는 파라미터 로그찍기
-		logger.debug("comparePass params : "+params);
-		System.out.println("comment commentNo >> "+params.get("commentNo"));
+		//System.out.println("comment commentNo >> "+params.get("commentNo"));
 		//사용자가 입력한 패스워드 받기
 		String pass = params.get("pass").toString();
-		System.out.println("params.get pass >> "+params.get("pass").toString());
+		//System.out.println("params.get pass >> "+params.get("pass").toString());
 		//입력받은 패스워드를 바로 암호화 시킨다.
 		String makepass = noticeService.makePassword(pass);
-		System.out.println("입력받은패스워드 암호화 한 값 >> "+makepass);
+		//System.out.println("입력받은패스워드 암호화 한 값 >> "+makepass);
 		
 		
 		
 		//댓글 수정/삭제 댓글번호 조회
 		int commentNo = Integer.valueOf(params.get("commentNo").toString());
 		Comment comment = noticeService.modifyComment(commentNo);
-		System.out.println("comment commentNo >> "+comment.getCommentNo());
-		System.out.println("코멘트 작성자 패스워드값 >> "+comment.getWriterPw());
+		//System.out.println("comment commentNo >> "+comment.getCommentNo());
+		//System.out.println("코멘트 작성자 패스워드값 >> "+comment.getWriterPw());
 		boolean result = comment.getWriterPw().equals(makepass);
 		
 		if(result){
 			comment.setCmtYn("Y");
-			return comment;
 		}else{
-
 			comment.setCmtYn("N");
-			return comment;
 		}
-			
 		
-		
-		
-		
+		return comment;
 	}
 	
-	/**
-	 * 게시글 삭제하기
+	
+	/** 게시글 삭제 화면
+	 * @param noticeNo
+	 * @return
 	 */
 	@RequestMapping("/notice/noticeDel.do")
 	@ResponseBody
 	public int noticeDel(@RequestParam int noticeNo){
-		System.out.println("게시글삭제 컨트롤러"+noticeNo);
+		//System.out.println("게시글삭제 컨트롤러"+noticeNo);
 		
 		Notice notice = noticeService.getNotice(noticeNo);
 		if(notice.getHasFile().equals("1")){
@@ -374,6 +362,7 @@ public class NoticeController {
 			
 			
 		}
+		
 		//해당게시글에있던 댓글도 삭제한다.
 		noticeService.deleteCommentNotice(noticeNo);
 		
@@ -383,12 +372,11 @@ public class NoticeController {
 		
 	}
 	
-	/**
-	 * 수정하기 페이지로 이동
-	 * 수정할 내용들 불러오기
-	 * 
-	 */
 	
+	/** 게스글 수정 그리드 화면
+	 * @param params
+	 * @return
+	 */
 	@RequestMapping("/notice/noticeEdit.do")
 	public ModelAndView noticeEdit(@RequestParam Map<String, Object> params){
 		logger.debug("noticeEdit params : "+params);
@@ -434,8 +422,11 @@ public class NoticeController {
 		
 	}
 	
-	/**
-	 * 수정하기완료
+	
+	/** 게시글 수정 화면
+	 * @param params
+	 * @param mRequest
+	 * @return
 	 */
 	@RequestMapping(value="notice/edit.do")
 	@ResponseBody
@@ -505,10 +496,10 @@ public class NoticeController {
 				
 	}
 	
-	/**
-	 * 첨부파일삭제하기
+	/** 첨부파일 삭제 화면
+	 * @param params
+	 * @return
 	 */
-	
 	@RequestMapping("/notice/deleteAttachFile.do")
 	public ModelAndView deleteAttachFile(@RequestParam Map<String, Object> params){
 		
@@ -551,81 +542,78 @@ public class NoticeController {
 		view.setViewName("notice/noticeEdit");
 		
 		return view;
-
-		
-		
-				
+			
 	}
 	
-	/**
-	 * 댓글작성
+	/** 댓글 쓰기 화면
+	 * @param comment
+	 * @return
+	 * @throws Exception
 	 */
-	
 	@RequestMapping("/notice/wrComment.do")
 	@ResponseBody
-	public Map<String, Object> wrComment(@ModelAttribute Comment comment,HttpServletRequest request,HttpServletResponse response)throws Exception{
-		System.out.println("댓글작성컨트롤러");
+	public Map<String, Object> wrComment(@ModelAttribute Comment comment)throws Exception{
+		//System.out.println("댓글작성컨트롤러");
 		Map<String, Object> retValues = new HashMap<String, Object>();
 		
-		System.out.println("사용자 입력받은패스워드값 >> "+comment.getWriterPw());
+		//System.out.println("사용자 입력받은패스워드값 >> "+comment.getWriterPw());
 		//입력받은 패스워드를 바로 암호화 시킨다.
 		String writerPw = noticeService.makePassword(comment.getWriterPw());
-		System.out.println("사용자 입력받은패스워드 암호화한값 >> "+writerPw);
+		//System.out.println("사용자 입력받은패스워드 암호화한값 >> "+writerPw);
 		
 		comment.setWriterPw(writerPw);
 		
 		int result = noticeService.setComment(comment);
-		System.out.println("comment.getCommentNo();"+comment.getCommentNo());
+		//System.out.println("comment.getCommentNo();"+comment.getCommentNo());
 		
 		if( result > 0){
 			retValues.put("retValues", result);
 		}else{
 			retValues.put("retValues",result);
 		}
-			
-		
-			
-		
-		
 		
 		return retValues;
 	}
 	
-	/**
-	 * 댓글리스트 불러오기
+	
+	/** 댓글 리스트 화면 불러오기
+	 * @param comment
+	 * @return
+	 * @throws Exception
 	 */
 	@RequestMapping("/notice/lsComment.do")
 	@ResponseBody
-	public List<HashMap<String, Object>> lsComment(@ModelAttribute Comment comment, HttpServletRequest request) throws Exception{
+	public List<Map<String, Object>> lsComment(@ModelAttribute Comment comment) throws Exception{
+			logger.debug("deleteAttachFile params : "+comment);
 			System.out.println("댓글리스트 불러오기");
 			Map<String, Object> retValues = new HashMap<String, Object>();
 		
 			//해당게시글의 댓글전체 가져오기
 			//해당게시글번호 로 댓글 테이블에서 리스트 가져오기
 			//즉 해당게시글번호만 필요함.
-			List<HashMap<String, Object>> list = noticeService.getComment(comment.getNoticeNo());
-			System.out.println("list >>>> "+list);
+			List<Map<String, Object>> list = noticeService.getComment(comment.getNoticeNo());
+			//System.out.println("list >>>> "+list);
 			
-			List<HashMap<String, Object>> htmList = new ArrayList<HashMap<String, Object>>();
+			List<Map<String, Object>> htmList = new ArrayList<Map<String, Object>>();
 			
 			if(list.size() > 0){
 				
 				for(int i=0; i < list.size(); i++){
-					HashMap<String, Object> cmtList = new HashMap<String, Object>();
+					Map<String, Object> cmtList = new HashMap<String, Object>();
 					
-					System.out.println("setCommentNo >> "+Integer.valueOf(list.get(i).get("commentNo").toString()));
+					//System.out.println("setCommentNo >> "+Integer.valueOf(list.get(i).get("commentNo").toString()));
 					cmtList.put("commentNo",list.get(i).get("commentNo"));
 					//cmtList.setCommentNo(Integer.valueOf(list.get(i).get("commentNo").toString()));
-					System.out.println("setComment >> "+list.get(i).get("comment"));
+					//System.out.println("setComment >> "+list.get(i).get("comment"));
 					cmtList.put("comment",list.get(i).get("comment"));
 					//cmtList.setComment(list.get(i).get("comment").toString());
-					System.out.println("setWriterPw >> "+list.get(i).get("writer"));
+					//System.out.println("setWriterPw >> "+list.get(i).get("writer"));
 					cmtList.put("writer",list.get(i).get("writer"));
 					//cmtList.setWriter(list.get(i).get("writer").toString());
-					System.out.println("setWriterPw >> "+list.get(i).get("writerPw"));
+					//System.out.println("setWriterPw >> "+list.get(i).get("writerPw"));
 					cmtList.put("writerPw",list.get(i).get("writerPw"));
 					//cmtList.setWriterPw(list.get(i).get("writerPw").toString());
-					System.out.println("setCreateDate >> "+list.get(i).get("createDate").toString());
+					//System.out.println("setCreateDate >> "+list.get(i).get("createDate").toString());
 					cmtList.put("createDate",list.get(i).get("createDate").toString());
 					//cmtList.setCreateDate(list.get(i).get("createDate").toString());
 					
@@ -642,11 +630,9 @@ public class NoticeController {
 		return htmList; 
 	}
 	
-	
-
-		
-	/**
-	 * 댓글 업데이트 화면
+	/** 댓글 수정 그리드 화면
+	 * @param params
+	 * @return
 	 */
 	@RequestMapping("/notice/cmtModify.do")
 	public ModelAndView cmtModify(@RequestParam Map<String, Object> params){
@@ -662,9 +648,9 @@ public class NoticeController {
 		return view;
 	}
 	
-
-	/**
-	 * 댓글 업데이트
+	/** 댓글 수정 화면
+	 * @param params
+	 * @return
 	 */
 	@RequestMapping("/notice/cmtUpdate.do")
 	@ResponseBody 
@@ -694,8 +680,9 @@ public class NoticeController {
 
 	}
 	
-	/**
-	 * 댓글 삭제하기
+	/** 댓글 삭제 화면
+	 * @param params
+	 * @return
 	 */
 	@RequestMapping("/notice/cmtDelete.do")
 	@ResponseBody 

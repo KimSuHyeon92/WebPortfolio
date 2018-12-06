@@ -17,12 +17,7 @@
 	<link rel="stylesheet" type="text/css" href="<c:url value="/resources/common/css/common.css" />" />
 
     <script type="text/javascript">
-    var mailOverOk = "N"; //메일중복확인여부
-    var checkEmail = "0"; //메일에서확인버튼클릭
-    var mailEndOk = "NO"; //메일확인까지완료
-    var mailSendOk = "NO"; //메일보내기
     $(document).ready(function(){
-        	
         	// 왼쪽메뉴그룹 
             $("#accordion").collapse();
             
@@ -56,13 +51,7 @@
 		        if($("#idSaveCheck").is(":checked")){ // ID 저장하기를 체크한 상태라면,
 		            setCookie("key", $("#LoginEmail").val(), 7); // 7일 동안 쿠키 보관
 		        }
-		    });
-		    
-		    //로그인상태
-		   
-		
-		   
-			
+		    });	
         });
 	    
         
@@ -72,7 +61,6 @@
         	var UserId = $("#userEmail").val();
         	var textCk = /^[A-Za-z0-9_\.\-]+@[A-Za-z0-9\-]+\.[A-Za-z0-9\-]+/;
 
-        	
         	if( UserId == null || UserId == '' ){
         		alert("이메일을 입력해주세요!");
         		return;
@@ -85,54 +73,67 @@
     				"userEmail" : UserId
     		}
 
-        	postAjax("<c:url value='/member/mailCheck.do' />", data, CheckmailAfter);
-        }
-        
-        //이메일중복체크 성공시
-        function CheckmailAfter(data){
         	
-        	if(data == 1){
-	       		 alert("등록 가능한 회원입니다");
-	       		 $("#mail-check").text("수정");
-	       		 var mailIn = $('#userEmail'); 
-	       		 mailIn.readOnly  = true;
-	       		 mailOverOk = "Y"; //메일중복확인
-	       		 var html ='<button type="button" onclick="mailReset()" class="btn btn-primary col-xs-4" id="mail-check">'+'수정'+'</button>';
-	       			$(".mailWrap").html(html);
-
-	       	 }else if ( data == -1){
-	       		 alert("이미 가입한 회원입니다");
-	       		 $("#userMail").val("");
-	
-	       	 }else{
-	       		 
-	       		 alert("회원가입을 진행해주세요");
-	       		 $("#userMail").val("");
-	
-	       	 }
-        	
-        }
+			$.ajax({
         		
+        		url: '<c:url value="/member/mailCheck.do" />',
+        		data : data ,
+        		success : function (data, textStatus, XMLHttpRequest) {
+        		
+        		if(data == 1){
+       	       		 alert("등록 가능한 회원입니다");
+       	       		 $("#mail-check").text("수정");
+       	       		 $('#userEmail').attr("readOnly",true);
+       	       		 $('#userEmail').attr("disabled",true);
+       	       		 $("#mailOverOk").val("Y"); //메일중복확인
+       	       		 var html ='<button type="button" onclick="mailReset()" class="btn btn-primary col-xs-4" id="mail-check">'+'수정'+'</button>';
+       	       			$(".mailWrap").html(html);
+
+       	       	 }else if ( data == -1){
+       	       		 alert("이미 가입한 회원입니다");
+       	       		 $("#userMail").val("");
+       	       		 return;
+       	       	 }else{
+       	       		 
+       	       		alert("잠시후에 시도해 주시기 바랍니다.\n접속량이 많아 원할하지 않을수 있습니다.\n지속적으로 발생시 브라우저를 모두종료후 재접속해 보시기바랍니다.");
+       	       		 $("#userMail").val("");
+       	       		 return;
+       	       	 }
+        		
+        		},
+        		//컨트롤러에서 보낸 result값이 false인경우
+        		error : function (XMLHttpRequest, textStatus, errorThrown) {
+        			console.log(XMLHttpRequest.responseText);
+        			alert(XMLHttpRequest.responseText);
+        		}
+        	});
+        }
         
-        function mailReset(){ //재설정 
+        function mailReset(){ //이메일재설정 
         	
-        	var mailIn = $('#userEmail'); 
-        	mailIn.readOnly  = false;
-        	mailOverOk = "N"; //메일중복확인
-        	mailEndOk = "NO"; //메일인증완료
+        	$('#userEmail').attr("readOnly",false); 
+        	$('#userEmail').removeAttr('disabled'); 
+        	
+        	$("#mailOverOk").val("N"); //메일중복확인
+        	$("#mailEndOk").val("NO"); //메일인증완료 
+        	$("#mailSendOk").val("NO"); //메일보내기여부
+        	$("#checkEmail").val(""); //메일인증번호 디폴트
+        	
+        	$('#certMsg').css('display','none');
         	$('#certCode').removeAttr('disabled'); //메일인증번호
 			$('#certCode').val();
-			$('#certMsg').css('display','none');
+			
         	var html ='<button type="button" onclick="mailCheck()" class="btn btn-primary col-xs-4" id="mail-check">'+'중복확인'+'</button>';
         	$(".mailWrap").html(html);
         	$("#userEmail").val("");
+        	
         }
         
       	//인증메일 발송
         function mailOk(){ 
         	
-        	if( mailEndOk == "OK" ){ 
-				alert('이미 인증을 완료하셨습니다.');
+        	if( $("#mailEndOk").val() == "OK" ){ //인증을 완료했다면 인증메일발송 x
+				alert('이미 인증을 완료하셨습니다.\n회원가입을 진행해주세요.');
 				return;
 			}else{
 				$('#certCode').removeAttr('disabled');
@@ -144,34 +145,20 @@
         		return;
         	}
         	
-        	if( mailOverOk != "Y" ){
+        	if( $("#mailOverOk").val() != "Y" ){
         		alert('이메일 중복확인을 진행해주세요.');
         		return;
         	}
         	     	
             //작성한 이메일 가져오기
        		var receiver = $("#userEmail").val();
-       		var sender = "kimsuhyeon1027@gmail.com";
-       		var subject = "김수현 포트폴리오 회원가입 인증메일";
-			var content = "";
-       		
-       		var html = "";
-   			
-   			html +=	'안녕하세요? 신입 웹개발자 김수현 사이트를 가입해주셔서 감사합니다.<br/>'
-   			
-   			content = html;
-   			
-       	
        		var exptext = /^[A-Za-z0-9_\.\-]+@[A-Za-z0-9\-]+\.[A-Za-z0-9\-]+/;
        		
-       		if(exptext.test(receiver) == true){
+       		if(exptext.test(receiver) == true){ //회원이메일 형식체크
        			
        			var data = {
-       				 'sender' : sender, 
        			     'receiver' : receiver,
-       			     'subject' : subject,
-       			     'content' : content,
-       			     'mailOverOk' : mailOverOk
+       			     'mailOverOk' : $("#mailOverOk").val()
        			}
        			
        			postAjax("<c:url value='/mail/addEmail.do' />", data, AddmailAfter);
@@ -188,14 +175,15 @@
        //메일보내기 완료후
        function AddmailAfter(data){
     	   
-    	   if( data.msg == "메일보내기 성공" ){
+    	   if( data.resultCode > 0 ){
 				alert("메일보내기성공");
-				mailSendOk = "OK";
-				checkEmail = data.authNum;
+				$("#mailSendOk").val("OK");
+				$("#checkEmail").val(data.authNum);
 				$('#certMsg').css('display','block');
-				
+				return;
 			}else {
 				alert("메일을 다시보내주세요");
+				return;
 			}
     	   
        }
@@ -204,20 +192,19 @@
         //인증완료버튼
         function mailEnd(){
         	
-        	
-        	if( mailEndOk == "OK" ){
+        	if( $("#mailEndOk").val() == "OK" ){
         		alert("이미 인증을 완료하셨습니다.");
         		return;
         	}
         	
-        	if( mailOverOk == "Y" && mailSendOk == "OK" ){
-				if( checkEmail == $('#certCode').val() ){ //인증완료
+        	if( $("#mailOverOk").val() == "Y" && $("#mailSendOk").val() == "OK" ){
+				if( $("#checkEmail").val() == $('#certCode').val() ){ //인증완료
 					alert("이메일 인증이 완료되었습니다.");
 					$('#certCode').attr( 'disabled', true );
-					mailEndOk = "OK";
+					$("#mailEndOk").val("OK");
 					return;
 				}else if($('#certCode').val() != null && $('#certCode').val() != ""){
-					if(checkEmail != $('#certCode').val()){
+					if($("#checkEmail").val() != $('#certCode').val()){
 						alert("이메일 인증 번호가 다릅니다.");
 						return;
 					}
@@ -225,16 +212,13 @@
 					alert("인증코드를 입력해주세요.");
 					return;
 				}
-        	}else if( mailOverOk != "Y" ){
+        	}else if( $("#mailOverOk").val() != "Y" ){
         		alert("메일중복확인을해주세요.");
         		return;
-        	}else if( mailSendOk != "OK" ){
-        		alert("메일을 발송후 인증번호를 확인해주세요");
+        	}else if( $("#mailSendOk").val() != "OK" ){
+        		alert("이메일 인증을 진행해주세요.");
         		return;
-        	}
-			
-			
-			
+        	}	
         	
         }
         
@@ -244,16 +228,16 @@
         	
         	var res ="";
         	
-        	if( mailEndOk == "OK" ){
-        		if( userNm == null || userNm == "" ){
+        	if( $("#mailEndOk").val() == "OK" ){
+        		if( $('#userNm').val() == null || $('#userNm').val() == "" ){
         			alert("닉네임을 작성해주세요.");
         			return;
         		}
-        		if( userPwd == null || userPwd == "" ){
+        		if( $('#userPwd').val() == null || $('#userPwd').val() == "" ){
         			alert("비밀번호 를 작성해주세요.");
         			return;
         		}
-        		if( userPwdCheck == null || userPwdCheck == "" ){
+        		if( $('#userPwdCheck').val() == null || $('#userPwdCheck').val() == "" ){
         			alert("비밀번호 재확인을 작성해주세요.");
         			return;
         		}
@@ -278,33 +262,42 @@
         		    		 "userEmail" : $('#userEmail').val()
         		     }
         			
-        			postAjax("<c:url value='/member/joinUs.do' />", data, JoinUsAfter);
+        			
+        			$.ajax({
+                		
+                		url: '<c:url value="/member/joinUs.do" />',
+                		data : data ,
+                		success : function (data, textStatus, XMLHttpRequest) {
+                		
+                			if(data.resultCode > 0){
+                				alert("회원가입이 정상적으로 처리되었습니다.");
+                				$('#JoinModal').modal('hide');
+                				location.reload();
+                			}else{
+                				alert("다시 회원가입을 진행해주세요.");
+                				$('#JoinModal').modal('hide');
+                				location.reload();
+                			}
+                		
+                		},
+                		//컨트롤러에서 보낸 result값이 false인경우
+                		error : function (XMLHttpRequest, textStatus, errorThrown) {
+                			console.log(XMLHttpRequest.responseText);
+                			alert(XMLHttpRequest.responseText);
+                		}
+                	});
         		     
         		    
         			
         		}
         	}else {
         		alert("메일 인증을 진행해주세요.");
+        		return;
         	}
         }
-       
-       //회원가입후
-       function JoinUsAfter(data){
-    	   if(data.retValues > 0){
-				alert("회원가입이 정상적으로 처리되었습니다.");
-				$('#JoinModal').modal('hide');
-				location.reload();
-			}else{
-				alert("다시 회원가입을 진행해주세요.");
-				$('#JoinModal').modal('hide');
-				location.reload();
-			}
-       }
-       
-        
-       
+            
       //로그인  
-        function LoginUs(){
+      function LoginUs(){
         	
         	var LoginEmail = $('#LoginEmail').val();
         	var LoginPw = $('#LoginPw').val();
@@ -335,18 +328,20 @@
       
        //로그인 완료후
        function LoginUsAfter(data){
-    	   if(data.retValues == "1" ){
+    	   
+    	   if(data.resultCode == 1 ){
 				$('#LoginModal').modal('hide');
 				location.reload();
 			}
-			if(data.retValues == "0" ){
+			if(data.resultCode == 0 ){
 				alert("등록된 이메일이 없습니다.");
 				return;
 			}
-			if(data.retValues == "-1" ){
+			if(data.resultCode == -1 ){
 				alert("등록된 비밀번호가 아닙니다.");
 				return;
 			}
+			
        }
       
        //엔터 클릭시 로그인
@@ -370,79 +365,151 @@
         function ShowLogin(){
         	$('#LoginModal').modal('show');
         }
-		
         
+        //비밀번호찾기
+        function resetPw(){
+        	
+        	var userEmail = $("#LoginEmail").val();
+        	var textCk = /^[A-Za-z0-9_\.\-]+@[A-Za-z0-9\-]+\.[A-Za-z0-9\-]+/;
 
+        	if( userEmail == null || userEmail == '' ){
+        		alert("이메일을 입력해주세요!");
+        		return;
+        	}else if( textCk.test(userEmail) == false ){
+        		alert("이메일 형식이 올바르지 않습니다.");
+        		return;
+        	}
+        	
+        	var data = {
+        			"userEmail" : userEmail
+        	}
+        	
+			$.ajax({
+        		
+        		url: '<c:url value="/member/resetPwGo.do" />',
+        		data : data ,
+        		success : function (data, textStatus, XMLHttpRequest) {
+        			if(data.resultCode > 0){
+                		
+                		var data = {
+                    			"receiver" : data.userEmail,
+                    			"resetPwYn" : "Y"
+                    	}
+                		
+                		postAjax("<c:url value='/mail/addEmail.do' />", data, resetPwMailAfter);
+                		
+                	}else{
+                		alert("등록된 이메일이 아닙니다.");
+                		return;
+                	}
+        		},
+        		//컨트롤러에서 보낸 result값이 false인경우
+        		error : function (XMLHttpRequest, textStatus, errorThrown) {
+        			console.log(XMLHttpRequest.responseText);
+        			alert(XMLHttpRequest.responseText);
+        		}
+        	});
+        	
+        	
+        	
+        }
 
+        function resetPwMailAfter(data){
+        	
+        	if(data.resultCode > 0 ){
+        		alert("이메일 로 인증번호 를 보냈습니다. 인증번호 를 확인해주세요.");
+				
+        		var userEmail = data.userEmail;
+        		
+        		var popUrl = '/WebPortfolio/member/resetPw.do?userEmail='+userEmail;
+        		
+        		var windowW = 400;  // 창의 가로 길이
+                var windowH = 420;  // 창의 세로 길이
+                var left = Math.ceil((window.screen.width - windowW)/2);
+                var top = Math.ceil((window.screen.height - windowH)/2);
 
-    </script>
+                window.open(popUrl,"","top="+top+", left="+left+", height="+windowH+", width="+windowW);
+
+        	}
+        }
+
+</script>
 </head>
 <body>
-
 <div id="wrap" class="frm">
-	<div class="top-title" > KimSuHyeon Web Project&nbsp;&nbsp;::&nbsp;&nbsp;<span class="sub-title" style="font-size: medium"></span>
-	<ul class="mypage">
-		<c:choose>
-			<c:when test="${sessionScope.isLogin == true}">	
-				<li class="MyInfo">${sessionScope.LoginName} 님의 방문을 환영합니다.</li>
-				<li class="loginOut" onclick="loginOut()"><span class ="glyphicon glyphicon-off"></span> 로그아웃</li>
-			</c:when>
-			<c:otherwise>
-				<li class="login" data-toggle="modal" data-target="#LoginModal" ><span class ="glyphicon glyphicon-off"></span> 로그인</li>
-				<li class="join" data-toggle="modal" data-target="#JoinModal"><span class ="glyphicon glyphicon-user"></span> 회원가입</li>
-			</c:otherwise>
-		</c:choose>
-	</ul>
-	</div>
-	<!--{ Login modal -->
-	<div class="modal fade" id="LoginModal" tabindex="-1" role="dialog"  aria-hidden="true">
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h3 class="modal-title text-center" id="myModalLabel">Login</h3>
-	      </div>
-	      <div class="modal-body">
-	        <input type="email" class="col-xs-12" id="LoginEmail" placeholder="이메일" maxlength="50"><input type="checkbox" id="idSaveCheck">아이디 기억하기
-	        <input type="password" class="col-xs-12" id="LoginPw"  placeholder="비밀번호" onkeydown="popenter();">
-	      </div>
-	      <div class="modal-footer">
-	        <button type="button" class="btn btn-primary btn-lg btn-block" onclick="LoginUs()">로그인</button>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-	<!--} Login modal -->
-	<!--{ Join modal -->
-	<div class="modal fade" id="JoinModal" tabindex="-1" role="dialog"  aria-hidden="true">
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h3 class="modal-title text-center" id="myModalLabel">Join</h3>
-	      </div>
-	      <div class="modal-body">
-	        <input type="email" class="col-xs-8" id="userEmail" placeholder="이메일" maxlength="50">
-	        <span class="mailWrap"><button type="button" onclick="mailCheck()" class="btn btn-primary col-xs-4" id="mail-check">중복확인</button></span>
-	        <ul class="listDot">
-				<li>중복확인 한 이메일로 인증 메일이 발송됩니다.</li>
-				<li>메일 확인 후 [인증번호] 를 입력하신후 인증확인 버튼을 눌러주시면 이메일 인증이 완료됩니다.</li>
-				<li>메일확인이 안될 경우 스펨메일함을 확인해주세요.</li>
-			</ul>
-			<p id="certMsg" style="display:none;"><input type="text" class="col-xs-12" id="certCode" placeholder="인증번호를 입력해주세요" ></p>
-	        <button type="button" class="btn btn-success col-xs-6" id="mailOk" onclick="mailOk()">이메일인증</button>
-	        <button type="button" class="btn btn-danger col-xs-6" id="mailEnd" onclick="mailEnd()">인증확인</button>
-	        <input type="text" class="col-xs-12" id="userNm" placeholder="닉네임" >
-	        <input type="password" class="col-xs-12" id="userPwd" placeholder="비밀번호" >
-	        <input type="password" class="col-xs-12" id="userPwdCheck" placeholder="비밀번호 재확인" >
-	      </div>
-	      <div class="modal-footer">
-	        <button type="button" onclick="JoinUs()" class="btn btn-primary btn-lg btn-block">회원가입</button>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-	<!--} Join modal -->
+	<form name="bbsForm" method="post">
+		<input type="hidden" name="mailOverOk" id="mailOverOk" value=""><!-- 메일중복확인여부 -->
+		<input type="hidden" name="mailEndOk" id="mailEndOk" value=""><!-- 인증번호확인여부 -->
+		<input type="hidden" name="mailSendOk" id="mailSendOk" value=""><!-- 메일보내기여부 -->
+		<input type="hidden" name="checkEmail" id="checkEmail" value=""><!-- 메일인증번호 -->
+	</form>	
+		<div class="top-title" >KimSuHyeon Web Project&nbsp;&nbsp;::&nbsp;&nbsp;<span class="sub-title" style="font-size: medium"></span>
+		<ul class="mypage">
+			<c:choose>
+				<c:when test="${sessionScope.isLogin == true}">	
+					<li class="MyInfo">${sessionScope.LoginName} 님의 방문을 환영합니다.</li>
+					<li class="loginOut" onclick="loginOut()"><span class ="glyphicon glyphicon-off"></span> 로그아웃</li>
+				</c:when>
+				<c:otherwise>
+					<li class="login" data-toggle="modal" data-target="#LoginModal" ><span class ="glyphicon glyphicon-off"></span> 로그인</li>
+					<li class="join" data-toggle="modal" data-target="#JoinModal"><span class ="glyphicon glyphicon-user"></span> 회원가입</li>
+				</c:otherwise>
+			</c:choose>
+		</ul>
+		</div>
+		<!--{ Login modal -->
+		<div class="modal fade" id="LoginModal" tabindex="-1" role="dialog"  aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h3 class="modal-title text-center" id="myModalLabel">Login</h3>
+		      </div>
+		      <div class="modal-body">
+		        <input type="email" class="col-xs-12" id="LoginEmail" placeholder="이메일" maxlength="50">
+		        <input type="password" class="col-xs-12" id="LoginPw"  placeholder="비밀번호" onkeydown="popenter();">
+		        <br>
+		        <input type="checkbox" id="idSaveCheck">아이디 기억하기
+		        <button type="button" class="btn btn-default pull-right" onclick="resetPw()">비밀번호찾기</button>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-primary btn-lg btn-block" onclick="LoginUs()">로그인</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<!--} Login modal -->
+		<!--{ Join modal -->
+		<div class="modal fade" id="JoinModal" tabindex="-1" role="dialog"  aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h3 class="modal-title text-center" id="myModalLabel">Join</h3>
+		      </div>
+		      <div class="modal-body">
+		        <input type="email" class="col-xs-8" id="userEmail" placeholder="이메일" maxlength="50">
+		        <span class="mailWrap"><button type="button" onclick="mailCheck()" class="btn btn-primary col-xs-4" id="mail-check">중복확인</button></span>
+		        <ul class="listDot">
+					<li>중복확인 한 이메일로 인증 메일이 발송됩니다.</li>
+					<li>메일 확인 후 [인증번호] 를 입력하신후 인증확인 버튼을 눌러주시면 이메일 인증이 완료됩니다.</li>
+					<li>메일확인이 안될 경우 스펨메일함을 확인해주세요.</li>
+				</ul>
+				<p id="certMsg" style="display:none;"><input type="text" class="col-xs-12" id="certCode" placeholder="인증번호를 입력해주세요" ></p>
+		        <button type="button" class="btn btn-success col-xs-6" id="mailOk" onclick="mailOk()">이메일인증</button>
+		        <button type="button" class="btn btn-danger col-xs-6" id="mailEnd" onclick="mailEnd()">인증확인</button>
+		        <input type="text" class="col-xs-12" id="userNm" placeholder="닉네임" >
+		        <input type="password" class="col-xs-12" id="userPwd" placeholder="비밀번호" >
+		        <input type="password" class="col-xs-12" id="userPwdCheck" placeholder="비밀번호 재확인" >
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" onclick="JoinUs()" class="btn btn-primary btn-lg btn-block">회원가입</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<!--} Join modal -->
+	
     <!--{ Top nav -->
 	<div class="btn-group btn-group-justified" role="group" style="margin-bottom:25px;">
 		<div class="btn-group" role="group">

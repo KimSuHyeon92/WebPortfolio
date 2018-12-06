@@ -1,6 +1,5 @@
 package com.pf.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.pf.common.Notice;
 import com.pf.common.Comment;
-import com.pf.common.Departments;
 import com.pf.dao.NoticeDao;
 import com.pf.service.NoticeService;
 
@@ -80,7 +78,7 @@ public class NoticeServiceImpl implements NoticeService {
 	}
 
 	@Override
-	public List<HashMap<String, Object>> getComment(int noticeNo) {
+	public List<Map<String, Object>> getComment(int noticeNo) {
 		// TODO Auto-generated method stub
 		return dao.getComment(noticeNo);
 	}
@@ -94,20 +92,20 @@ public class NoticeServiceImpl implements NoticeService {
 	@Override
 	public int updateComment(Comment comment) {
 		// TODO Auto-generated method stub
-		System.out.println("여기까지는타냐 >>>>>>>>>>>");
+		//System.out.println("여기까지는타냐 >>>>>>>>>>>");
 		return dao.updateComment(comment);
 	}
 
 	@Override
-	public int deleteComment(int no) {
+	public int deleteComment(int commentNo) {
 		// TODO Auto-generated method stub
-		return dao.deleteComment(no);
+		return dao.deleteComment(commentNo);
 	}
 
 	@Override
-	public int deleteCommentNotice(int no) {
+	public int deleteCommentNotice(int noticeNo) {
 		// TODO Auto-generated method stub
-		return dao.deleteCommentNotice(no);
+		return dao.deleteCommentNotice(noticeNo);
 	}
 
 }

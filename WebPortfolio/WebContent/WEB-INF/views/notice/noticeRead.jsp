@@ -8,6 +8,7 @@
 
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/bootstrap/css/bootstrap.css" />" />
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/default.css" />" />
+<link rel="stylesheet" type="text/css" href="<c:url value="/resources/common/css/common.css" />" />
 
 <script type="text/javascript" src="<c:url value="/resources/jquery/js/jquery-3.2.1.js" />"></script>
 <script type="text/javascript" src="<c:url value="/resources/common/js/common.js" />"></script>
@@ -29,39 +30,7 @@ td.content {
 button{
 	padding:0 8px;
 }
-.comment-Wrap {
-	margin-top:30px;
-}
 
-
-.comment-Wrap .title {
-	padding: 0 15px 0 20px;
-}
-
-.comment-Wrap .wrap {
-	padding:15px 20px;
-}
-
-.comment-Wrap .wrap .login {
-	margin-bottom:10px;
-}
-
-.comment-Wrap .wrap .login .title {
-	width:50px;display: inline-block;
-}
-
-.comment-Wrap .wrap .login #writer,
-.comment-Wrap .wrap .login #writerPw {
-	margin-left:20px; margin-bottom:5px;
-}
-
-.comment-Wrap .wrap button {
-	float:right;margin-top:10px;
-}
-
-#CmMain{
-	padding:15px 20px;
-}
 </style>
 <script type="text/javascript">
 
@@ -218,7 +187,7 @@ button{
 	        url : "<c:url value='/notice/wrComment.do' />",
 	        data:data,
 	        success : function(data){
-	        	if( data.retValues == 1 ){
+	        	if( data.retValues > 0 ){
 	        		alert("댓글이 등록 되었습니다.");
 	        		var wrCmtYn="Y";
 	    			getCommentList(); //댓글불러오기
@@ -226,7 +195,8 @@ button{
 	                $("#writer").val("");
 	                $("#writerPw").val("");
 	    		}else{
-	    			
+	    			alert("댓글 등록이 실패했습니다. 다시 시도해주세요.");
+	    			return;
 	    		}
 	        },
 	        error:function(request,status,error){
@@ -341,7 +311,8 @@ button{
 			url: '<c:url value="/notice/cmtDelete.do" />',
 			// 파라미터는 오브젝트 { name : value} 형태로
 			data : {
-				commentNo : commentNo
+				commentNo : commentNo,
+				noticeNo : $('#noticeNo').val()
 				// id 가 boardNo 인 element의 값(val) 을 가져옴
 			},
 			//컨트롤러에서 보낸 result값이 true인경우

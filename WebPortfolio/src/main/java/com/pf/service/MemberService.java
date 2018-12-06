@@ -14,5 +14,5 @@ public interface MemberService {
 
 	Member selectCustBase(Member vo) throws Exception;
 	int userInsert (Member vo) throws Exception;
-	
+	int updateUserPw (Member basic) throws Exception;
 }

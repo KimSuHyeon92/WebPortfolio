@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.pf.common.CertEmail;
+import com.pf.common.Email;
 import com.pf.service.EmailService;
 import com.pf.util.MailUtil;
 

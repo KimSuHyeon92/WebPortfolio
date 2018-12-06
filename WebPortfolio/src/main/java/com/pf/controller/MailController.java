@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.pf.common.CertEmail;
 import com.pf.service.EmailService;
 import com.pf.util.MailUtil;
 
@@ -100,12 +98,15 @@ public class MailController {
 		logger.debug("addEmail params > " + params);
 		//System.out.println("메일보내기탐 >>>>>"+params.get("mailOverOk"));
 		Map<String, Object> retValues = new HashMap<String, Object>();
-		String msg = null;
-		
 		
 		try{
 		
-			if("Y".equals(params.get("sendProfile"))){
+			if("Y".equals(params.get("sendProfile"))){ //개인프로필보내기일때
+				System.out.println("개인프로필보내기탐>>>>>>>>>>>");
+				params.put("sender", "kimsuhyeon1027@gmail.com");
+	       		params.put("subject", "신입 웹개발자 김수현 이력서 입니다.");
+	       		params.put("content", "안녕하세요? 신입 웹개발자 김수현이력서 를 받아주셔서 감사합니다.");
+	       		
 				attachResource = ctx.getResource("classpath:attach/kimsuhyeonprofile.docx");
 				
 				File f = attachResource.getFile();
@@ -118,38 +119,69 @@ public class MailController {
 				
 				params.put("attachFilePath", attachResource.getFile().getAbsolutePath()); //파일의절대경로
 				//System.out.println("333333333"+params.get("attachFilePath"));
+				
+			} else if("Y".equals(params.get("mailOverOk"))){ //회원가입일때
+				//System.out.println("회원가입탐>>>>>>>>>>>");
+				params.put("sender", "kimsuhyeon1027@gmail.com");
+	       		params.put("subject", "김수현 포트폴리오 회원가입 인증메일");
+	       		
+	       		String authNum = "";
+				authNum = RandomNum();
+				retValues.put("authNum", authNum); //view 로 인증번호를 넘겨준다.
+				params.put("authNum", authNum); //params 에 넣어 메일로 보내준다.
+	   			
+	   			String html = "";
+				html +=("<p>안녕하세요? 신입 웹개발자 김수현 사이트를 가입해주셔서 감사합니다.</p>");
+				html +=("<p>아래 인증번호를 홈페이지에서 입력하신후 인증확인버튼 을 누르시면 인증확인이 완료됩니다.</p>");
+				html +=("<p>인증번호 [");
+				html +=(params.get("authNum") );
+				html +=("]</p>");
+				params.put("content", html);
+   
+			} else if("Y".equals(params.get("resetPwYn"))){ //비밀번호찾기일때
+				params.put("sender", "kimsuhyeon1027@gmail.com");
+	       		params.put("subject", "김수현 포트폴리오 비밀번호 변경 인증번호를 보내드립니다.");
+	       		
+	       		String authNum = "";
+				authNum = RandomNum();
+				HttpSession session = request.getSession();
+				session.setAttribute("authNum", authNum); //세션 로 인증번호를 넘겨준다.
+				params.put("authNum", authNum); //params 에 넣어 메일로 보내준다.
+	   			
+	   			String html = "";
+				html +=("<p>비밀번호 변경 인증번호 를 확인해주시고 홈페이지에서 인증번호를 입력해주세요.</p>");
+				html +=("<p>인증번호 [");
+				html +=(params.get("authNum") );
+				html +=("]</p>");
+				params.put("content", html);
+				retValues.put("userEmail", params.get("receiver"));
 			}
 		
-		emService.addEmail(params);
-		System.out.println("이메일 add 성공=================");
-		
-		if("Y".equals(params.get("mailOverOk"))){
-			String authNum = "";
-			authNum = RandomNum();
-			retValues.put("authNum", authNum); 
-	        params.put("authNum", authNum); //params 에 넣어 메일로 보내준다.
-		}
-		
-		mail.sendEmail(params);
-		System.out.println("이메일 send 성공=================");
-		
-		
-		
-		//System.out.println("메일인증테이블 add 성공================="+basic.getCertYn()+basic.getSendEmail()+basic.getUserEmail()+basic.getIdx());
-		
-		emService.updateEmail(params);
-		System.out.println("이메일 update 성공=================");
-		
-		msg = "메일보내기 성공";
-		
-		retValues.put("msg", msg);
-		
+			int EmailCode = emService.addEmail(params);
+			
+			if(EmailCode > 0){
+				
+				int sendCode = mail.sendEmail(params);
+				
+				if(sendCode == 1 ){
+					retValues.put("resultCode", 1);
+					//System.out.println("이메일 send 성공=================");
+				}else{
+					retValues.put("resultCode", -2);
+					//System.out.println("이메일 send 실패=================");
+				}
+				
+				//System.out.println("이메일 add 성공=================");
+				
+			}else{
+				retValues.put("resultCode", -1);
+				//System.out.println("이메일 add 실패=================");
+			}
 		
 		}catch (Exception e) {
-			msg = "메일보내기 실패";
-			
-			retValues.put("msg", msg);
-			
+			e.printStackTrace();
+			retValues.put("resultCode", 0);
+			//System.out.println("이메일 컨트롤러접근 실패=================");
 		}
 		
 		return retValues;

@@ -20,73 +20,64 @@ public class MailUtil {
 	@Autowired
     protected JavaMailSender  mailSender;
 	
-	public void sendEmail(Map<String, String> params) throws Exception {
+	public int sendEmail(Map<String, String> params) throws Exception { 
 		MimeMessage msg = mailSender.createMimeMessage();
-		System.out.println("메일유틸컨트롤러탐 >>> " + params);
+		//System.out.println("메일유틸컨트롤러탐 >>> " + params);
 		
 		try{
 		
+			MimeMessageHelper helper = new MimeMessageHelper(msg, true,"UTF-8");
+			//Mime:메세지 생성 helper:내용추가 
+			//String result="";
 			
+			//dto사용시
+			helper.setFrom(params.get("sender"));
+			helper.setTo(params.get("receiver"));
+			helper.setSubject(params.get("subject"));
 			
-		MimeMessageHelper helper = new MimeMessageHelper(msg, true,"UTF-8");
-		//Mime:메세지 생성 helper:내용추가 
-		String result="";
-		//dto사용시
-		helper.setFrom(params.get("sender"));
-		helper.setTo(params.get("receiver"));
-		helper.setSubject(params.get("subject"));
-		
-		if("Y".equals(params.get("mailOverOk"))){ //인증메일일경우 본문다름
-			System.out.println("mailOverOk 탐 >>> " + params);
-			String html = "";
-			html +=("<p>안녕하세요? 신입 웹개발자 김수현 사이트를 가입해주셔서 감사합니다.</p>");
-			html +=("<p>아래 인증번호를 홈페이지에서 입력하신후 인증확인버튼 을 누르시면 인증확인이 완료됩니다.</p>");
-			html +=("<p>인증번호 [ ");
-			html +=(params.get("authNum") );
-			html +=(" ]</p>");
-			helper.setText(html, true);
-					
-
-			result = "회원가입인증메일본문";
-			System.out.println("회원가입인증메일본문 >>>>>>> "+helper);
-		}else{
-			helper.setText(params.get("content"));
-			result = "이력서메일보내기본문";
-			System.out.println("이력서메일보내기본문 >>>>>>> "+helper);
-		}
-		
-		System.out.println("text >>>>>>"+result);
-		
-		if("Y".equals(params.get("sendProfile"))){ //인증메일이 아닌 이력서첨부 메일보내기일경우
-			File tempFile = new File(params.get("attachFilePath"));
-				System.out.println("tempFile >> " + tempFile);
+			if("Y".equals(params.get("mailOverOk")) || "Y".equals(params.get("resetPwYn"))){ //인증메일일경우 본문다름
+				
+				//System.out.println("mailOverOk 탐 >>> " + params);
+				helper.setText(params.get("content"), true);
+				//result = "회원가입인증메일본문";
+				//System.out.println("회원가입인증메일본문 >>>>>>> "+helper);
+				
+			}else if("Y".equals(params.get("sendProfile"))){ //프로필보내기일경우
+				helper.setText(params.get("content"));
+				
+				File tempFile = new File(params.get("attachFilePath"));
+				//System.out.println("tempFile >> " + tempFile);
 			
-			
-			FileSystemResource file = new FileSystemResource(tempFile);
-				System.out.println("-------------------------------------------------------------------");
+				FileSystemResource file = new FileSystemResource(tempFile);
+				/*System.out.println("-------------------------------------------------------------------");
 				System.out.println("attach file path : "+tempFile.getAbsolutePath());
 				System.out.println("attach file name : "+tempFile.getName());
 				System.out.println("attach file size : "+tempFile.length());
-				System.out.println("-------------------------------------------------------------------");
-				
+				System.out.println("-------------------------------------------------------------------");*/
 				
 				helper.addAttachment(file.getFilename(), file);
 				params.put("filename", tempFile.getName());
 				params.put("fileSize", String.valueOf(tempFile.length()));
-				
 	
-				System.out.println("helper >>>>>>>> "+file.getFilename());
+				/*System.out.println("helper >>>>>>>> "+file.getFilename());
 				System.out.println("params filename >>>>>>>> "+params.get("filename"));
-				System.out.println("params fileSize >>>>>>>> "+params.get("fileSize"));
-		}
+				System.out.println("params fileSize >>>>>>>> "+params.get("fileSize"));*/
+				
+				//result = "이력서메일보내기본문";
+				//System.out.println("이력서메일보내기본문 >>>>>>> "+helper);
 		
-		mailSender.send(msg); //최종적으로메일을보낸다
-		
-		System.out.println("메일보내기성공 >>>>>>>>>>>>>>>>");
-		
+			}
+			
+			//System.out.println("text >>>>>>"+result);
+			
+			mailSender.send(msg); //최종적으로메일을보낸다
+			
+			//System.out.println("메일보내기성공 >>>>>>>>>>>>>>>>");
+			return 1;
 		}catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
+			return -1;
 		}
 			
 	}

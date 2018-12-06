@@ -25,6 +25,12 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 		SELECT LAST_INSERT_ID()
 		</selectKey>
 	</insert>
+	
+	<update id="updateUserPw" parameterType="com.pf.common.Member">
+		UPDATE member
+		SET userPassword = sha2(md5(#{userPassword}),256)
+		WHERE userNo = #{userNo}
+	</update>
 
 	
 	
