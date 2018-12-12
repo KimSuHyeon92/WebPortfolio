@@ -788,13 +788,16 @@ $(document).ready(function(){
 	                                    	 // 그리고 esle문을 빠져나가 아래 변수선언 코드 및 유효성검사 실행 해서 조건에 해당될경우 %를 붙이고 아니면 유효성검사중에 걸려 alert값 반환
 	                                    	 //즉 20작성후 -> 20% -> 한번 지우기 -> 2% -> 유효성검사 -> 맞으면 newsalaries값 나타남
 	                                    	 // 처음부터 0이상20이하 값을 작성하지 않으면 alert값 반환해준다. -> 0이하값이나 20이상값은 아예 적을수 없음
-	                                    	 
-	                                    	 
-	                                        $('#dialogSalaries input#addSalaries').val($('#dialogSalaries input#addSalaries').val().substring($('#dialogSalaries input#addSalaries').val().length-1,0));
+	                                    	 alert($('#dialogSalaries input#addSalaries').val());
+	                                    	 alert($('#dialogSalaries input#addSalaries').val().length)
+	                                    	 alert($('#dialogSalaries input#addSalaries').val().length-1);
+	                                    	 alert($('#dialogSalaries input#addSalaries').val().substring($('#dialogSalaries input#addSalaries').val().length-1,0));
+	                                        //$('#dialogSalaries input#addSalaries').val($('#dialogSalaries input#addSalaries').val().substring($('#dialogSalaries input#addSalaries').val().length-1,0));
 	                                     
 	                                     } 
 										
 									   }
+								     
 									
 									
 										//변수로 선언한 값에 div id="" 값을 가져온다.

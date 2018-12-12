@@ -10,7 +10,7 @@
 		<!-- 이컴퓨터에서 데이터를 아마존에 넣어두고 아마존에서 내 컴퓨터를 바라본다  : localhost -->
 		<!-- 데이터베이스 url -->
 		<property name="user" value="employees"/>
-		<property name="password" value="admin1027"/>
+		<property name="password" value="admin"/>
 		<property name="initialPoolSize" value="20"/>
 		<!-- 톤캣 - 풀 -풀갯수 -->
 		<property name="maxPoolSize" value="200"/>

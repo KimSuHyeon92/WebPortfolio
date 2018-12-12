@@ -51,17 +51,6 @@ public class EmailServiceImpl implements EmailService {
 		return emdao.updateEmail(params);
 	}
 
-	@Override
-	public int addCertEmail(Email basic) {
-		// TODO Auto-generated method stub
-		return emdao.addCertEmail(basic);
-	}
-
-	@Override
-	public int updateCertEmail(String userEmail) {
-		// TODO Auto-generated method stub
-		return emdao.updateCertEmail(userEmail);
-	}
 
 
 }

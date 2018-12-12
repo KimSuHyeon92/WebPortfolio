@@ -11,7 +11,5 @@ public interface EmailDao {
 	public int addEmail (Map<String, String> params);
 	public int deleteEmail (int params);
 	public int updateEmail (Map<String, String> params);
-	public int addCertEmail (Email basic);
-	public int updateCertEmail (String userEmail);
 	
 }

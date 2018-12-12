@@ -22,6 +22,9 @@ $(document).ready(function(){
 	$( "#tabs" ).tabs();
 });
 </script>
+<style>
+.page_desc li{margin:5px 0 10px;} 
+</style>
 <title></title>
 </head>
 <body>
@@ -33,12 +36,14 @@ $(document).ready(function(){
 	<div id="tabs-1">
 			이 페이지는 아래 항목을 이용하여 구현하였습니다.<br/>
 	  		<ul class="page_desc">
-				<li>Spring Framework 4.3.12.RELEASE</li>
-				<li>myBatis 3.4.1</li>
-				<li>bootstrap</li>
+	  			<li>Server OS : Windows10 64bit</li>
+	  			<li>Framework : Spring Framework 4.3.18.RELEASE</li>
+				<li>WAS Server : Tomcat 8.5</li>
+				<li>WEB Server : Apache</li>
+				<li>DB : MySQL 5.7</li>
+				<li>형상관리도구 : svn , git</li>
 			</ul>
-			<br/>
-			last update.... 2018. 11. 13
+			
 		<table id="deptGrid"></table>
 		<div id="deptGrid-pager"></div>
 	</div>

@@ -94,7 +94,7 @@ public class MailController {
 	 */
 	@RequestMapping("mail/addEmail.do")
 	@ResponseBody
-	public Map<String, Object> addEmail( @RequestParam Map<String, String> params,ModelMap model,HttpServletRequest request, HttpServletResponse response){
+	public Map<String, Object> addEmail( @RequestParam Map<String, String> params,HttpServletRequest request, HttpServletResponse response){
 		logger.debug("addEmail params > " + params);
 		//System.out.println("메일보내기탐 >>>>>"+params.get("mailOverOk"));
 		Map<String, Object> retValues = new HashMap<String, Object>();
@@ -102,7 +102,7 @@ public class MailController {
 		try{
 		
 			if("Y".equals(params.get("sendProfile"))){ //개인프로필보내기일때
-				System.out.println("개인프로필보내기탐>>>>>>>>>>>");
+				//System.out.println("개인프로필보내기탐>>>>>>>>>>>");
 				params.put("sender", "kimsuhyeon1027@gmail.com");
 	       		params.put("subject", "신입 웹개발자 김수현 이력서 입니다.");
 	       		params.put("content", "안녕하세요? 신입 웹개발자 김수현이력서 를 받아주셔서 감사합니다.");
