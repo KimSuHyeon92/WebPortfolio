@@ -59,7 +59,7 @@ $(document).ready(function(){
 			        		
 			        		//작성한 이메일 가져오기
 			        		var receiver = $('#dialogMail input#mailtext').val();
-			        		var sender = "kimsuhyeon1027@gmail.com";
+			        		var sender = "kisusu1027@gmail.com";
 			        		var subject = "신입 웹개발자 김수현 이력서 입니다.";
 			        		var content = "안녕하세요? 신입 웹개발자 김수현이력서 를 받아주셔서 감사합니다.";
 			        		//var filename = "";

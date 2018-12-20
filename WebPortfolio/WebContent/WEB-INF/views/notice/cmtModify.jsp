@@ -30,7 +30,7 @@ function modifyComment(){
 		success : function (data, textStatus, XMLHttpRequest) {
 			//alert("여기타야됨");
 			if(data.retValues>0){
-				alert("댓글이 수정되었습니다.");
+				//alert("댓글이 수정되었습니다.");
 				//var noticeNo = $("#noticeNo").val();
 				//alert(noticeNo);
 				//alert(${list.noticeNo });

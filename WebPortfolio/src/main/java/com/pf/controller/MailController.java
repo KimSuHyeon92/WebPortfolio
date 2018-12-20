@@ -103,7 +103,7 @@ public class MailController {
 		
 			if("Y".equals(params.get("sendProfile"))){ //개인프로필보내기일때
 				//System.out.println("개인프로필보내기탐>>>>>>>>>>>");
-				params.put("sender", "kimsuhyeon1027@gmail.com");
+				params.put("sender", "kisusu1027@gmail.com");
 	       		params.put("subject", "신입 웹개발자 김수현 이력서 입니다.");
 	       		params.put("content", "안녕하세요? 신입 웹개발자 김수현이력서 를 받아주셔서 감사합니다.");
 	       		
@@ -122,7 +122,7 @@ public class MailController {
 				
 			} else if("Y".equals(params.get("mailOverOk"))){ //회원가입일때
 				//System.out.println("회원가입탐>>>>>>>>>>>");
-				params.put("sender", "kimsuhyeon1027@gmail.com");
+				params.put("sender", "kisusu1027@gmail.com");
 	       		params.put("subject", "김수현 포트폴리오 회원가입 인증메일");
 	       		
 	       		String authNum = "";
@@ -139,7 +139,7 @@ public class MailController {
 				params.put("content", html);
    
 			} else if("Y".equals(params.get("resetPwYn"))){ //비밀번호찾기일때
-				params.put("sender", "kimsuhyeon1027@gmail.com");
+				params.put("sender", "kisusu1027@gmail.com");
 	       		params.put("subject", "김수현 포트폴리오 비밀번호 변경 인증번호를 보내드립니다.");
 	       		
 	       		String authNum = "";
